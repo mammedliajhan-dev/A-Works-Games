@@ -19,7 +19,189 @@
             scroll-behavior: smooth;
         }
 
-        /* Фиксированный 3D-фон (как живое видео без паузы у Samsung) */
+        /* --- КИНЕМАТОГРАФИЧНОЕ ИНТРО ПРИ ВХОДЕ --- */
+        #intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #0a1124 0%, #030407 80%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            perspective: 900px;
+            overflow: hidden;
+            transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.9s;
+        }
+
+        #intro-overlay.hide-intro {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* 3D-пол с сеткой для удара */
+        .intro-floor {
+            position: absolute;
+            width: 200vw;
+            height: 120vh;
+            bottom: -45vh;
+            background-image: 
+                linear-gradient(rgba(0, 210, 255, 0.18) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 210, 255, 0.18) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: rotateX(75deg);
+            mask-image: radial-gradient(circle at center, black 10%, transparent 70%);
+            -webkit-mask-image: radial-gradient(circle at center, black 10%, transparent 70%);
+        }
+
+        /* Летящий 3D-логотип */
+        .flying-logo {
+            width: 110px;
+            height: 110px;
+            border-radius: 26px;
+            background: linear-gradient(135deg, #00d2ff 0%, #0044ff 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 64px;
+            font-weight: 900;
+            color: #ffffff;
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+            z-index: 3;
+            transform: translate3d(0, -600px, 700px) rotateX(60deg) rotateZ(-35deg);
+            opacity: 0;
+            animation: logoCrash 1.25s cubic-bezier(0.6, 0.04, 0.98, 0.335) forwards;
+        }
+
+        @keyframes logoCrash {
+            0% {
+                opacity: 0;
+                transform: translate3d(0, -650px, 750px) rotateX(65deg) rotateY(40deg) rotateZ(-45deg) scale(2.6);
+            }
+            20% {
+                opacity: 1;
+            }
+            82% {
+                /* Момент врезания в пол */
+                transform: translate3d(0, 35px, 0) rotateX(18deg) rotateY(0deg) rotateZ(0deg) scale(1.25, 0.72);
+                box-shadow: 0 0 120px #00ffff, 0 0 200px #0066ff;
+            }
+            100% {
+                /* Отскок на свое место */
+                opacity: 1;
+                transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);
+            }
+        }
+
+        /* Ударная волна по полу */
+        .shockwave {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 5px solid #00ffff;
+            box-shadow: 0 0 50px #00d2ff, inset 0 0 30px #00d2ff;
+            opacity: 0;
+            transform: translateY(35px) rotateX(72deg) scale(0.1);
+            z-index: 2;
+        }
+
+        .shockwave.boom {
+            animation: waveSpread 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes waveSpread {
+            0% {
+                opacity: 1;
+                transform: translateY(35px) rotateX(72deg) scale(0.3);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(35px) rotateX(72deg) scale(18);
+                border-width: 1px;
+            }
+        }
+
+        /* Искры при ударе */
+        .sparks-box {
+            position: absolute;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .spark {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00ffff;
+            box-shadow: 0 0 12px #00ffff;
+            opacity: 0;
+        }
+
+        /* Постепенное написание A-WORKS */
+        .intro-title {
+            margin-top: 32px;
+            display: flex;
+            gap: 6px;
+            font-size: clamp(38px, 7vw, 74px);
+            font-weight: 900;
+            letter-spacing: 8px;
+            z-index: 3;
+        }
+
+        .intro-letter {
+            opacity: 0;
+            transform: translateY(25px) scale(0.7);
+            display: inline-block;
+            background: linear-gradient(180deg, #ffffff 0%, #00d2ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 18px rgba(0, 210, 255, 0.7));
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .intro-letter.typed {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .intro-sub {
+            margin-top: 8px;
+            font-size: 14px;
+            letter-spacing: 14px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: 0.6s ease;
+            z-index: 3;
+        }
+
+        .intro-sub.typed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Тряска камеры в момент удара */
+        .camera-shake {
+            animation: shakeScreen 0.45s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shakeScreen {
+            10%, 90% { transform: translate3d(-6px, 4px, 0); }
+            20%, 80% { transform: translate3d(8px, -6px, 0); }
+            30%, 50%, 70% { transform: translate3d(-10px, -4px, 0); }
+            40%, 60% { transform: translate3d(10px, 6px, 0); }
+        }
+
+        /* --- ОСНОВНОЙ САЙТ --- */
         #bg-canvas {
             position: fixed;
             top: 0;
@@ -30,7 +212,6 @@
             pointer-events: none;
         }
 
-        /* Верхняя навигация в стиле матового стекла */
         header {
             position: fixed;
             top: 0;
@@ -68,7 +249,6 @@
             color: #fff;
         }
 
-        /* Первый экран (Hero Section) */
         .hero {
             height: 100vh;
             display: flex;
@@ -150,7 +330,6 @@
             50% { transform: translateY(-10px); }
         }
 
-        /* Промежуточный экран при скролле (эффект презентации) */
         .feature-showcase {
             height: 80vh;
             display: flex;
@@ -180,7 +359,6 @@
             text-shadow: 0 0 30px rgba(0, 210, 255, 0.4);
         }
 
-        /* Секция с играми */
         .games-section {
             min-height: 100vh;
             padding: 100px 8vw;
@@ -272,6 +450,78 @@
             transform: scale(1.02);
         }
 
+        /* Игровое полноэкранное окно */
+        #game-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #03050a;
+            z-index: 9999;
+            touch-action: none;
+        }
+
+        #game-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .game-hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .hud-stats {
+            background: rgba(10, 15, 30, 0.75);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            padding: 12px 22px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .hud-stats span {
+            color: #00d2ff;
+        }
+
+        .close-game-btn {
+            pointer-events: auto;
+            background: rgba(255, 50, 80, 0.85);
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .close-game-btn:hover {
+            background: #ff1e42;
+            transform: scale(1.05);
+        }
+
+        .game-hint {
+            position: absolute;
+            bottom: 25px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            pointer-events: none;
+        }
+
         footer {
             text-align: center;
             padding: 50px 20px;
@@ -288,7 +538,25 @@
 </head>
 <body>
 
-    <!-- Безостановочная живая 3D-анимация на фоне -->
+    <!-- АНИМАЦИЯ ВХОДА: ЛЕТИТ ЛОГОТИП, ВРЕЗАЕТСЯ В ПОЛ И ПИШЕТСЯ A-WORKS -->
+    <div id="intro-overlay">
+        <div class="intro-floor"></div>
+        <div class="flying-logo">A</div>
+        <div class="shockwave" id="shockwave"></div>
+        <div class="sparks-box" id="sparks-box"></div>
+
+        <div class="intro-title" id="intro-title">
+            <span class="intro-letter">A</span>
+            <span class="intro-letter">-</span>
+            <span class="intro-letter">W</span>
+            <span class="intro-letter">O</span>
+            <span class="intro-letter">R</span>
+            <span class="intro-letter">K</span>
+            <span class="intro-letter">S</span>
+        </div>
+        <div class="intro-sub" id="intro-sub">STUDIO</div>
+    </div>
+
     <canvas id="bg-canvas"></canvas>
 
     <header>
@@ -299,7 +567,6 @@
         </nav>
     </header>
 
-    <!-- Первая секция (При входе) -->
     <section class="hero">
         <div class="badge">Interactive 3D Experience</div>
         <h1>БУДУЩЕЕ ИГР<br>В ТВОИХ РУКАХ</h1>
@@ -311,40 +578,35 @@
         </div>
     </section>
 
-    <!-- Эффект презентации как у Samsung Z Flip -->
     <section class="feature-showcase" id="showcase">
         <div class="feature-text" id="reveal-text">
             Реалистичная <span class="highlight">3D-физика</span>, высокая частота кадров и полное погружение — прямо на твоем устройстве.
         </div>
     </section>
 
-    <!-- Каталог твоих игр -->
     <section class="games-section" id="games">
         <h2 class="section-title">Наши проекты</h2>
         <p class="section-subtitle">Выбирай вселенную и начинай играть</p>
 
         <div class="games-grid">
-            <!-- Игра 1 -->
             <div class="game-card">
                 <div>
-                    <span class="game-tag">Авиасимулятор • 3D</span>
+                    <span class="game-tag">Авиасимулятор • 3D (Демо доступно!)</span>
                     <h3>SkyLine Flight Sim</h3>
-                    <p>Пилотирование реактивных лайнеров и турбовинтовых самолетов в сложных погодных условиях с реалистичной кабиной и физикой.</p>
+                    <p>Пилотирование реактивного истребителя сквозь энергетические кольца. Управляй самолетом мышкой, клавишами WASD или пальцем на смартфоне!</p>
                 </div>
-                <button class="btn" onclick="alert('Запуск демо-версии скоро будет доступен!')">Играть / Скачать</button>
+                <button class="btn" onclick="startFlightGame()">🚀 Играть прямо сейчас</button>
             </div>
 
-            <!-- Игра 2 -->
             <div class="game-card">
                 <div>
                     <span class="game-tag">Автосимулятор • Открытый мир</span>
                     <h3>City Drive: Next-Gen</h3>
                     <p>Свободная езда по ночному мегаполису, детальный тюнинг автомобилей, реалистичная подвеска и трафик с умным ИИ.</p>
                 </div>
-                <button class="btn" onclick="alert('Проект в активной разработке!')">Подробнее</button>
+                <button class="btn" onclick="alert('Проект в активной разработке! Скоро появится демо-версия.')">Подробнее</button>
             </div>
 
-            <!-- Игра 3 -->
             <div class="game-card">
                 <div>
                     <span class="game-tag">Экшен • Песочница</span>
@@ -356,14 +618,76 @@
         </div>
     </section>
 
+    <div id="game-modal">
+        <div class="game-hud">
+            <div class="hud-stats">Кольца: <span id="score-val">0</span> | Скорость: <span id="speed-val">450</span> км/ч</div>
+            <button class="close-game-btn" onclick="stopFlightGame()">✕ Выйти</button>
+        </div>
+        <canvas id="game-canvas"></canvas>
+        <div class="game-hint">Управление: Мышка / WASD / Стрелки (или води пальцем по экрану телефона)</div>
+    </div>
+
     <footer>
         © 2026 A-Works Studio. Все права защищены. Создано с использованием WebGL & Three.js.
     </footer>
 
-    <!-- Подключаем 3D-движок Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // 1. Создаем 3D-сцену (работает как живое видео без кнопок паузы)
+        // --- СЦЕНАРИЙ ВСТУПИТЕЛЬНОЙ ЗАСТАВКИ (INTRO) ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const overlay = document.getElementById('intro-overlay');
+            const shockwave = document.getElementById('shockwave');
+            const sparksBox = document.getElementById('sparks-box');
+            const letters = document.querySelectorAll('.intro-letter');
+            const sub = document.getElementById('intro-sub');
+
+            // Ровно в момент удара логотипа об пол (1.02 сек)
+            setTimeout(() => {
+                // Тряска камеры и ударная волна
+                overlay.classList.add('camera-shake');
+                shockwave.classList.add('boom');
+
+                // Разлет искр от удара
+                for (let i = 0; i < 24; i++) {
+                    const spark = document.createElement('div');
+                    spark.className = 'spark';
+                    sparksBox.appendChild(spark);
+
+                    const angle = (Math.PI * 2 * i) / 24;
+                    const velocity = 90 + Math.random() * 140;
+                    const tx = Math.cos(angle) * velocity;
+                    const ty = Math.sin(angle) * (velocity * 0.5) - 20;
+
+                    spark.animate([
+                        { transform: 'translate(0, 20px) scale(1.4)', opacity: 1 },
+                        { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
+                    ], {
+                        duration: 550 + Math.random() * 350,
+                        easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+                    });
+                }
+
+                // Постепенно буква за буквой пишется A-WORKS
+                letters.forEach((letter, index) => {
+                    setTimeout(() => {
+                        letter.classList.add('typed');
+                    }, 180 + index * 110);
+                });
+
+                // Появление слова STUDIO
+                setTimeout(() => {
+                    sub.classList.add('typed');
+                }, 1050);
+
+            }, 1020);
+
+            // Плавный переход к самому сайту
+            setTimeout(() => {
+                overlay.classList.add('hide-intro');
+            }, 3400);
+        });
+
+        // --- ФОНОВАЯ 3D-СЦЕНА САЙТА ---
         const canvas = document.getElementById('bg-canvas');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -371,11 +695,9 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        // 2. Создаем футуристическое 3D-ядро в центре
         const coreGroup = new THREE.Group();
         scene.add(coreGroup);
 
-        // Внешняя неоновая сетка
         const outerGeo = new THREE.IcosahedronGeometry(2.2, 1);
         const outerMat = new THREE.MeshStandardMaterial({
             color: 0x00d2ff,
@@ -386,7 +708,6 @@
         const outerMesh = new THREE.Mesh(outerGeo, outerMat);
         coreGroup.add(outerMesh);
 
-        // Внутренний темный металлический кристалл
         const innerGeo = new THREE.OctahedronGeometry(1.4, 0);
         const innerMat = new THREE.MeshStandardMaterial({
             color: 0x111827,
@@ -396,14 +717,12 @@
         const innerMesh = new THREE.Mesh(innerGeo, innerMat);
         coreGroup.add(innerMesh);
 
-        // Орбитальное кольцо вокруг ядра
         const ringGeo = new THREE.TorusGeometry(3.4, 0.03, 16, 100);
         const ringMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
         const ringMesh = new THREE.Mesh(ringGeo, ringMat);
         ringMesh.rotation.x = Math.PI / 2.3;
         coreGroup.add(ringMesh);
 
-        // 3. Добавляем звездную пыль вокруг
         const particlesGeo = new THREE.BufferGeometry();
         const particlesCount = 700;
         const posArray = new Float32Array(particlesCount * 3);
@@ -420,7 +739,6 @@
         const particlesMesh = new THREE.Points(particlesGeo, particlesMat);
         scene.add(particlesMesh);
 
-        // Освещение
         const light1 = new THREE.PointLight(0x00d2ff, 3, 20);
         light1.position.set(4, 4, 4);
         scene.add(light1);
@@ -429,19 +747,14 @@
         light2.position.set(-4, -4, 2);
         scene.add(light2);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
-
+        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
         camera.position.z = 7;
 
-        // 4. Реакция на скролл (эффект как на сайте Samsung Galaxy Z Flip)
         let scrollY = window.scrollY;
         const revealText = document.getElementById('reveal-text');
 
         window.addEventListener('scroll', () => {
             scrollY = window.scrollY;
-            
-            // Появление текста при прокрутке
             if (scrollY > window.innerHeight * 0.35) {
                 revealText.classList.add('visible');
             } else {
@@ -449,43 +762,181 @@
             }
         });
 
-        // Плавная реакция на движение мышки
-        let mouseX = 0;
-        let mouseY = 0;
+        let mouseX = 0, mouseY = 0;
         window.addEventListener('mousemove', (e) => {
             mouseX = (e.clientX / window.innerWidth - 0.5) * 0.8;
             mouseY = (e.clientY / window.innerHeight - 0.5) * 0.8;
         });
 
-        // 5. Бесконечный цикл анимации (60 FPS, нельзя поставить на паузу)
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // Постоянное плавное вращение
+        function animateBg() {
+            requestAnimationFrame(animateBg);
             outerMesh.rotation.y += 0.004;
             outerMesh.rotation.x += 0.002;
             innerMesh.rotation.y -= 0.008;
             ringMesh.rotation.z -= 0.005;
             particlesMesh.rotation.y += 0.0008;
 
-            // Трансформация 3D-сцены при скролле вниз
             const scrollFactor = scrollY * 0.003;
             coreGroup.rotation.y = scrollFactor * 1.5 + mouseX;
             coreGroup.rotation.x = scrollFactor + mouseY;
-
-            // Приближение и смещение объекта, когда переходишь к списку игр
             camera.position.z = Math.max(3.5, 7 - scrollFactor * 1.2);
             coreGroup.position.x = Math.sin(scrollFactor) * 1.8;
 
             renderer.render(scene, camera);
         }
-        animate();
+        animateBg();
 
-        // Адаптация под размер экрана телефона или ПК
+        // --- ВСТРОЕННАЯ 3D-ИГРА: SKYLINE FLIGHT SIM ---
+        let gameActive = false;
+        let gameRenderer, gameScene, gameCamera, jetGroup, targetRing, gridHelper;
+        let score = 0, speed = 450;
+        let targetX = 0, targetY = 0;
+        const keys = {};
+
+        function initGame() {
+            const gCanvas = document.getElementById('game-canvas');
+            gameScene = new THREE.Scene();
+            gameScene.fog = new THREE.FogExp2(0x03050a, 0.025);
+
+            gameCamera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 500);
+            gameCamera.position.set(0, 2, 8);
+
+            gameRenderer = new THREE.WebGLRenderer({ canvas: gCanvas, antialias: true });
+            gameRenderer.setSize(window.innerWidth, window.innerHeight);
+
+            const gLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            gLight.position.set(5, 10, 7);
+            gameScene.add(gLight);
+            gameScene.add(new THREE.AmbientLight(0x00d2ff, 0.6));
+
+            gridHelper = new THREE.GridHelper(200, 80, 0x00d2ff, 0x112244);
+            gridHelper.position.y = -5;
+            gameScene.add(gridHelper);
+
+            jetGroup = new THREE.Group();
+            
+            const bodyGeo = new THREE.ConeGeometry(0.6, 3.2, 6);
+            bodyGeo.rotateX(Math.PI / 2);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.7, roughness: 0.2 });
+            jetGroup.add(new THREE.Mesh(bodyGeo, bodyMat));
+
+            const wingGeo = new THREE.BoxGeometry(4.2, 0.08, 1.1);
+            const wingMat = new THREE.MeshStandardMaterial({ color: 0x00d2ff, metalness: 0.5, roughness: 0.3 });
+            const wings = new THREE.Mesh(wingGeo, wingMat);
+            wings.position.z = 0.4;
+            jetGroup.add(wings);
+
+            const tailGeo = new THREE.BoxGeometry(0.1, 0.9, 0.8);
+            const tail = new THREE.Mesh(tailGeo, wingMat);
+            tail.position.set(0, 0.45, 1.1);
+            jetGroup.add(tail);
+
+            const flameGeo = new THREE.SphereGeometry(0.32, 12, 12);
+            const flameMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+            const flame = new THREE.Mesh(flameGeo, flameMat);
+            flame.position.z = 1.65;
+            jetGroup.add(flame);
+
+            gameScene.add(jetGroup);
+
+            const rGeo = new THREE.TorusGeometry(2.3, 0.18, 16, 60);
+            const rMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
+            targetRing = new THREE.Mesh(rGeo, rMat);
+            resetRing();
+            gameScene.add(targetRing);
+
+            window.addEventListener('mousemove', (e) => {
+                if (!gameActive) return;
+                targetX = ((e.clientX / window.innerWidth) - 0.5) * 12;
+                targetY = -((e.clientY / window.innerHeight) - 0.5) * 7;
+            });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!gameActive) return;
+                const touch = e.touches[0];
+                targetX = ((touch.clientX / window.innerWidth) - 0.5) * 12;
+                targetY = -((touch.clientY / window.innerHeight) - 0.5) * 7;
+            }, { passive: true });
+
+            window.addEventListener('keydown', (e) => keys[e.code] = true);
+            window.addEventListener('keyup', (e) => keys[e.code] = false);
+        }
+
+        function resetRing() {
+            targetRing.position.z = -65;
+            targetRing.position.x = (Math.random() - 0.5) * 12;
+            targetRing.position.y = (Math.random() - 0.5) * 6;
+        }
+
+        function startFlightGame() {
+            document.getElementById('game-modal').style.display = 'block';
+            if (!gameRenderer) initGame();
+            gameActive = true;
+            score = 0;
+            speed = 450;
+            updateHud();
+            resetRing();
+            animateGame();
+        }
+
+        function stopFlightGame() {
+            gameActive = false;
+            document.getElementById('game-modal').style.display = 'none';
+        }
+
+        function updateHud() {
+            document.getElementById('score-val').innerText = score;
+            document.getElementById('speed-val').innerText = Math.round(speed);
+        }
+
+        function animateGame() {
+            if (!gameActive) return;
+            requestAnimationFrame(animateGame);
+
+            if (keys['KeyA'] || keys['ArrowLeft']) targetX -= 0.18;
+            if (keys['KeyD'] || keys['ArrowRight']) targetX += 0.18;
+            if (keys['KeyW'] || keys['ArrowUp']) targetY += 0.15;
+            if (keys['KeyS'] || keys['ArrowDown']) targetY -= 0.15;
+
+            targetX = Math.max(-7, Math.min(7, targetX));
+            targetY = Math.max(-3.5, Math.min(4.5, targetY));
+
+            jetGroup.position.x += (targetX - jetGroup.position.x) * 0.1;
+            jetGroup.position.y += (targetY - jetGroup.position.y) * 0.1;
+            jetGroup.rotation.z = -(targetX - jetGroup.position.x) * 0.45;
+            jetGroup.rotation.x = (targetY - jetGroup.position.y) * 0.25;
+
+            const step = 0.65 + (score * 0.03);
+            gridHelper.position.z = (gridHelper.position.z + step) % 5;
+            targetRing.position.z += step;
+            targetRing.rotation.z += 0.04;
+
+            if (targetRing.position.z > 0 && targetRing.position.z < 1.5) {
+                const dist = Math.hypot(jetGroup.position.x - targetRing.position.x, jetGroup.position.y - targetRing.position.y);
+                if (dist < 2.6) {
+                    score++;
+                    speed += 25;
+                    updateHud();
+                    resetRing();
+                }
+            }
+
+            if (targetRing.position.z > 8) {
+                resetRing();
+            }
+
+            gameRenderer.render(gameScene, gameCamera);
+        }
+
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            if (gameRenderer) {
+                gameCamera.aspect = window.innerWidth / window.innerHeight;
+                gameCamera.updateProjectionMatrix();
+                gameRenderer.setSize(window.innerWidth, window.innerHeight);
+            }
         });
     </script>
 </body>
