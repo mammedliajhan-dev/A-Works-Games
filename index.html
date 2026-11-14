@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-Works Studio — Next-Gen Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #050508;
+            color: #ffffff;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Фиксированный 3D-фон (как живое видео без паузы у Samsung) */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Верхняя навигация в стиле матового стекла */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(5, 5, 8, 0.5);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #fff, #00d2ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            color: #aaa;
+            text-decoration: none;
+            margin-left: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        /* Первый экран (Hero Section) */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .badge {
+            padding: 6px 16px;
+            border-radius: 30px;
+            background: rgba(0, 210, 255, 0.12);
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            color: #00d2ff;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(42px, 8vw, 88px);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -2px;
+            margin-bottom: 20px;
+            background: linear-gradient(180deg, #ffffff 0%, #7a8ba8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: clamp(16px, 2vw, 22px);
+            color: #94a3b8;
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            color: #64748b;
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            animation: bounce 2s infinite;
+        }
+
+        .mouse-icon {
+            width: 24px;
+            height: 38px;
+            border: 2px solid #64748b;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .mouse-icon::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 8px;
+            background: #00d2ff;
+            border-radius: 2px;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Промежуточный экран при скролле (эффект презентации) */
+        .feature-showcase {
+            height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .feature-text {
+            font-size: clamp(28px, 5vw, 56px);
+            font-weight: 800;
+            max-width: 850px;
+            line-height: 1.2;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .feature-text.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .highlight {
+            color: #00d2ff;
+            text-shadow: 0 0 30px rgba(0, 210, 255, 0.4);
+        }
+
+        /* Секция с играми */
+        .games-section {
+            min-height: 100vh;
+            padding: 100px 8vw;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-title {
+            font-size: clamp(32px, 4vw, 48px);
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .section-subtitle {
+            color: #94a3b8;
+            font-size: 18px;
+            margin-bottom: 60px;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .game-card {
+            background: rgba(15, 20, 32, 0.65);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 32px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.01);
+            border-color: rgba(0, 210, 255, 0.5);
+            box-shadow: 0 20px 50px rgba(0, 210, 255, 0.15);
+        }
+
+        .game-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #00d2ff;
+            margin-bottom: 20px;
+            width: fit-content;
+        }
+
+        .game-card h3 {
+            font-size: 26px;
+            margin-bottom: 12px;
+            font-weight: 800;
+        }
+
+        .game-card p {
+            color: #94a3b8;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            text-align: center;
+            padding: 14px 24px;
+            border-radius: 14px;
+            background: linear-gradient(90deg, #00d2ff, #0066ff);
+            color: #fff;
+            font-weight: 700;
+            text-decoration: none;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
+            transform: scale(1.02);
+        }
+
+        footer {
+            text-align: center;
+            padding: 50px 20px;
+            color: #475569;
+            font-size: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 15px 20px; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Безостановочная живая 3D-анимация на фоне -->
+    <canvas id="bg-canvas"></canvas>
+
+    <header>
+        <div class="logo">A-Works Studio</div>
+        <nav class="nav-links">
+            <a href="#showcase">Технологии</a>
+            <a href="#games">Игры</a>
+        </nav>
+    </header>
+
+    <!-- Первая секция (При входе) -->
+    <section class="hero">
+        <div class="badge">Interactive 3D Experience</div>
+        <h1>БУДУЩЕЕ ИГР<br>В ТВОИХ РУКАХ</h1>
+        <p>Интерактивная вселенная симуляторов и экшенов нового поколения. Свайпай вверх или крути колесико, чтобы управлять сценой.</p>
+        
+        <div class="scroll-indicator">
+            <div class="mouse-icon"></div>
+            <span>Листай вниз</span>
+        </div>
+    </section>
+
+    <!-- Эффект презентации как у Samsung Z Flip -->
+    <section class="feature-showcase" id="showcase">
+        <div class="feature-text" id="reveal-text">
+            Реалистичная <span class="highlight">3D-физика</span>, высокая частота кадров и полное погружение — прямо на твоем устройстве.
+        </div>
+    </section>
+
+    <!-- Каталог твоих игр -->
+    <section class="games-section" id="games">
+        <h2 class="section-title">Наши проекты</h2>
+        <p class="section-subtitle">Выбирай вселенную и начинай играть</p>
+
+        <div class="games-grid">
+            <!-- Игра 1 -->
+            <div class="game-card">
+                <div>
+                    <span class="game-tag">Авиасимулятор • 3D</span>
+                    <h3>SkyLine Flight Sim</h3>
+                    <p>Пилотирование реактивных лайнеров и турбовинтовых самолетов в сложных погодных условиях с реалистичной кабиной и физикой.</p>
+                </div>
+                <button class="btn" onclick="alert('Запуск демо-версии скоро будет доступен!')">Играть / Скачать</button>
+            </div>
+
+            <!-- Игра 2 -->
+            <div class="game-card">
+                <div>
+                    <span class="game-tag">Автосимулятор • Открытый мир</span>
+                    <h3>City Drive: Next-Gen</h3>
+                    <p>Свободная езда по ночному мегаполису, детальный тюнинг автомобилей, реалистичная подвеска и трафик с умным ИИ.</p>
+                </div>
+                <button class="btn" onclick="alert('Проект в активной разработке!')">Подробнее</button>
+            </div>
+
+            <!-- Игра 3 -->
+            <div class="game-card">
+                <div>
+                    <span class="game-tag">Экшен • Песочница</span>
+                    <h3>Project: Cyber Core</h3>
+                    <p>Динамичный экшен с разрушаемым окружением, кастомной физикой объектов и поддержкой управления как на ПК, так и на смартфонах.</p>
+                </div>
+                <button class="btn" onclick="alert('Скоро открытие бета-теста!')">Предрегистрация</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        © 2026 A-Works Studio. Все права защищены. Создано с использованием WebGL & Three.js.
+    </footer>
+
+    <!-- Подключаем 3D-движок Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // 1. Создаем 3D-сцену (работает как живое видео без кнопок паузы)
+        const canvas = document.getElementById('bg-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // 2. Создаем футуристическое 3D-ядро в центре
+        const coreGroup = new THREE.Group();
+        scene.add(coreGroup);
+
+        // Внешняя неоновая сетка
+        const outerGeo = new THREE.IcosahedronGeometry(2.2, 1);
+        const outerMat = new THREE.MeshStandardMaterial({
+            color: 0x00d2ff,
+            wireframe: true,
+            emissive: 0x0044ff,
+            emissiveIntensity: 0.6
+        });
+        const outerMesh = new THREE.Mesh(outerGeo, outerMat);
+        coreGroup.add(outerMesh);
+
+        // Внутренний темный металлический кристалл
+        const innerGeo = new THREE.OctahedronGeometry(1.4, 0);
+        const innerMat = new THREE.MeshStandardMaterial({
+            color: 0x111827,
+            metalness: 0.9,
+            roughness: 0.1
+        });
+        const innerMesh = new THREE.Mesh(innerGeo, innerMat);
+        coreGroup.add(innerMesh);
+
+        // Орбитальное кольцо вокруг ядра
+        const ringGeo = new THREE.TorusGeometry(3.4, 0.03, 16, 100);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
+        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+        ringMesh.rotation.x = Math.PI / 2.3;
+        coreGroup.add(ringMesh);
+
+        // 3. Добавляем звездную пыль вокруг
+        const particlesGeo = new THREE.BufferGeometry();
+        const particlesCount = 700;
+        const posArray = new Float32Array(particlesCount * 3);
+        for(let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 25;
+        }
+        particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particlesMat = new THREE.PointsMaterial({
+            size: 0.03,
+            color: 0x00d2ff,
+            transparent: true,
+            opacity: 0.7
+        });
+        const particlesMesh = new THREE.Points(particlesGeo, particlesMat);
+        scene.add(particlesMesh);
+
+        // Освещение
+        const light1 = new THREE.PointLight(0x00d2ff, 3, 20);
+        light1.position.set(4, 4, 4);
+        scene.add(light1);
+
+        const light2 = new THREE.PointLight(0x7000ff, 3, 20);
+        light2.position.set(-4, -4, 2);
+        scene.add(light2);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        camera.position.z = 7;
+
+        // 4. Реакция на скролл (эффект как на сайте Samsung Galaxy Z Flip)
+        let scrollY = window.scrollY;
+        const revealText = document.getElementById('reveal-text');
+
+        window.addEventListener('scroll', () => {
+            scrollY = window.scrollY;
+            
+            // Появление текста при прокрутке
+            if (scrollY > window.innerHeight * 0.35) {
+                revealText.classList.add('visible');
+            } else {
+                revealText.classList.remove('visible');
+            }
+        });
+
+        // Плавная реакция на движение мышки
+        let mouseX = 0;
+        let mouseY = 0;
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth - 0.5) * 0.8;
+            mouseY = (e.clientY / window.innerHeight - 0.5) * 0.8;
+        });
+
+        // 5. Бесконечный цикл анимации (60 FPS, нельзя поставить на паузу)
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Постоянное плавное вращение
+            outerMesh.rotation.y += 0.004;
+            outerMesh.rotation.x += 0.002;
+            innerMesh.rotation.y -= 0.008;
+            ringMesh.rotation.z -= 0.005;
+            particlesMesh.rotation.y += 0.0008;
+
+            // Трансформация 3D-сцены при скролле вниз
+            const scrollFactor = scrollY * 0.003;
+            coreGroup.rotation.y = scrollFactor * 1.5 + mouseX;
+            coreGroup.rotation.x = scrollFactor + mouseY;
+
+            // Приближение и смещение объекта, когда переходишь к списку игр
+            camera.position.z = Math.max(3.5, 7 - scrollFactor * 1.2);
+            coreGroup.position.x = Math.sin(scrollFactor) * 1.8;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Адаптация под размер экрана телефона или ПК
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
