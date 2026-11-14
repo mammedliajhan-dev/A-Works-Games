@@ -43,7 +43,6 @@
             pointer-events: none;
         }
 
-        /* 3D-пол с сеткой для удара */
         .intro-floor {
             position: absolute;
             width: 200vw;
@@ -58,7 +57,6 @@
             -webkit-mask-image: radial-gradient(circle at center, black 10%, transparent 70%);
         }
 
-        /* Летящий 3D-логотип */
         .flying-logo {
             width: 110px;
             height: 110px;
@@ -84,22 +82,17 @@
                 opacity: 0;
                 transform: translate3d(0, -650px, 750px) rotateX(65deg) rotateY(40deg) rotateZ(-45deg) scale(2.6);
             }
-            20% {
-                opacity: 1;
-            }
+            20% { opacity: 1; }
             82% {
-                /* Момент врезания в пол */
                 transform: translate3d(0, 35px, 0) rotateX(18deg) rotateY(0deg) rotateZ(0deg) scale(1.25, 0.72);
                 box-shadow: 0 0 120px #00ffff, 0 0 200px #0066ff;
             }
             100% {
-                /* Отскок на свое место */
                 opacity: 1;
                 transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);
             }
         }
 
-        /* Ударная волна по полу */
         .shockwave {
             position: absolute;
             width: 40px;
@@ -117,24 +110,11 @@
         }
 
         @keyframes waveSpread {
-            0% {
-                opacity: 1;
-                transform: translateY(35px) rotateX(72deg) scale(0.3);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(35px) rotateX(72deg) scale(18);
-                border-width: 1px;
-            }
+            0% { opacity: 1; transform: translateY(35px) rotateX(72deg) scale(0.3); }
+            100% { opacity: 0; transform: translateY(35px) rotateX(72deg) scale(18); border-width: 1px; }
         }
 
-        /* Искры при ударе */
-        .sparks-box {
-            position: absolute;
-            z-index: 4;
-            pointer-events: none;
-        }
-
+        .sparks-box { position: absolute; z-index: 4; pointer-events: none; }
         .spark {
             position: absolute;
             width: 6px;
@@ -145,7 +125,6 @@
             opacity: 0;
         }
 
-        /* Постепенное написание A-WORKS */
         .intro-title {
             margin-top: 32px;
             display: flex;
@@ -167,10 +146,7 @@
             transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .intro-letter.typed {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
+        .intro-letter.typed { opacity: 1; transform: translateY(0) scale(1); }
 
         .intro-sub {
             margin-top: 8px;
@@ -184,16 +160,9 @@
             z-index: 3;
         }
 
-        .intro-sub.typed {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .intro-sub.typed { opacity: 1; transform: translateY(0); }
 
-        /* Тряска камеры в момент удара */
-        .camera-shake {
-            animation: shakeScreen 0.45s cubic-bezier(.36,.07,.19,.97) both;
-        }
-
+        .camera-shake { animation: shakeScreen 0.45s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shakeScreen {
             10%, 90% { transform: translate3d(-6px, 4px, 0); }
             20%, 80% { transform: translate3d(8px, -6px, 0); }
@@ -245,9 +214,7 @@
             transition: 0.3s;
         }
 
-        .nav-links a:hover {
-            color: #fff;
-        }
+        .nav-links a:hover { color: #fff; }
 
         .hero {
             height: 100vh;
@@ -349,15 +316,8 @@
             transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .feature-text.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .highlight {
-            color: #00d2ff;
-            text-shadow: 0 0 30px rgba(0, 210, 255, 0.4);
-        }
+        .feature-text.visible { opacity: 1; transform: translateY(0); }
+        .highlight { color: #00d2ff; text-shadow: 0 0 30px rgba(0, 210, 255, 0.4); }
 
         .games-section {
             min-height: 100vh;
@@ -366,21 +326,12 @@
             z-index: 2;
         }
 
-        .section-title {
-            font-size: clamp(32px, 4vw, 48px);
-            font-weight: 800;
-            margin-bottom: 12px;
-        }
-
-        .section-subtitle {
-            color: #94a3b8;
-            font-size: 18px;
-            margin-bottom: 60px;
-        }
+        .section-title { font-size: clamp(32px, 4vw, 48px); font-weight: 800; margin-bottom: 12px; }
+        .section-subtitle { color: #94a3b8; font-size: 18px; margin-bottom: 60px; }
 
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 30px;
         }
 
@@ -418,23 +369,19 @@
             width: fit-content;
         }
 
-        .game-card h3 {
-            font-size: 26px;
-            margin-bottom: 12px;
-            font-weight: 800;
-        }
+        .game-card h3 { font-size: 26px; margin-bottom: 12px; font-weight: 800; }
+        .game-card p { color: #94a3b8; font-size: 15px; line-height: 1.6; margin-bottom: 25px; }
 
-        .game-card p {
-            color: #94a3b8;
-            font-size: 15px;
-            line-height: 1.6;
-            margin-bottom: 30px;
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .btn {
             display: inline-block;
             text-align: center;
-            padding: 14px 24px;
+            padding: 14px 20px;
             border-radius: 14px;
             background: linear-gradient(90deg, #00d2ff, #0066ff);
             color: #fff;
@@ -443,6 +390,7 @@
             transition: 0.3s;
             border: none;
             cursor: pointer;
+            font-size: 15px;
         }
 
         .btn:hover {
@@ -450,7 +398,17 @@
             transform: scale(1.02);
         }
 
-        /* Игровое полноэкранное окно */
+        .btn-download {
+            background: rgba(0, 210, 255, 0.12);
+            border: 1px solid rgba(0, 210, 255, 0.5);
+            color: #00d2ff;
+        }
+
+        .btn-download:hover {
+            background: rgba(0, 210, 255, 0.25);
+        }
+
+        /* --- ПОЛНОЭКРАННЫЙ СИМУЛЯТОР СВОБОДНОГО ПОЛЕТА --- */
         #game-modal {
             display: none;
             position: fixed;
@@ -458,9 +416,10 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: #03050a;
+            background: #000;
             z-index: 9999;
             touch-action: none;
+            user-select: none;
         }
 
         #game-canvas {
@@ -469,57 +428,140 @@
             display: block;
         }
 
-        .game-hud {
+        /* Военный авиационный HUD (ИЛС) */
+        .cockpit-hud {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .hud-top {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            pointer-events: none;
+            align-items: flex-start;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
-        .hud-stats {
-            background: rgba(10, 15, 30, 0.75);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 210, 255, 0.4);
-            padding: 12px 22px;
-            border-radius: 16px;
-            font-size: 18px;
-            font-weight: 800;
-            color: #fff;
-        }
-
-        .hud-stats span {
-            color: #00d2ff;
-        }
-
-        .close-game-btn {
-            pointer-events: auto;
-            background: rgba(255, 50, 80, 0.85);
-            color: #fff;
-            border: none;
-            padding: 12px 20px;
+        .telemetry-box {
+            background: rgba(5, 15, 25, 0.75);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 255, 136, 0.5);
+            padding: 14px 20px;
             border-radius: 14px;
+            color: #00ff88;
+            font-family: monospace;
+            font-size: 15px;
+            line-height: 1.6;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+        }
+
+        .telemetry-box b { color: #ffffff; }
+
+        /* Прицел авиагоризонта по центру экрана */
+        .hud-crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 140px;
+            border: 1px dashed rgba(0, 255, 136, 0.4);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hud-crosshair::before, .hud-crosshair::after {
+            content: '';
+            position: absolute;
+            background: #00ff88;
+        }
+        .hud-crosshair::before { width: 30px; height: 2px; }
+        .hud-crosshair::after { width: 2px; height: 14px; }
+
+        /* Предупреждение STALL (Сваливание) */
+        #stall-alert {
+            position: absolute;
+            top: 22%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 50, 0.85);
+            color: #fff;
+            padding: 10px 28px;
+            border-radius: 8px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            font-size: 20px;
+            display: none;
+            animation: blinkStall 0.35s infinite alternate;
+        }
+
+        @keyframes blinkStall {
+            from { opacity: 1; transform: translateX(-50%) scale(1); }
+            to { opacity: 0.3; transform: translateX(-50%) scale(1.08); }
+        }
+
+        .hud-controls-top {
+            display: flex;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .hud-btn {
+            background: rgba(15, 25, 45, 0.85);
+            color: #00d2ff;
+            border: 1px solid rgba(0, 210, 255, 0.5);
+            padding: 10px 16px;
+            border-radius: 12px;
             font-weight: 700;
             cursor: pointer;
             transition: 0.2s;
         }
 
-        .close-game-btn:hover {
-            background: #ff1e42;
-            transform: scale(1.05);
+        .hud-btn:hover { background: rgba(0, 210, 255, 0.25); }
+
+        .close-game-btn {
+            background: rgba(255, 40, 70, 0.85);
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
         }
 
-        .game-hint {
-            position: absolute;
-            bottom: 25px;
+        /* Экранные кнопки для телефона и мышки */
+        .touch-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
             width: 100%;
+            pointer-events: auto;
+        }
+
+        .throttle-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .ctrl-hint {
+            background: rgba(5, 10, 20, 0.7);
+            padding: 10px 18px;
+            border-radius: 12px;
+            color: #94a3b8;
+            font-size: 13px;
             text-align: center;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 14px;
-            pointer-events: none;
+            border: 1px solid rgba(255,255,255,0.08);
         }
 
         footer {
@@ -533,6 +575,7 @@
         @media (max-width: 768px) {
             header { padding: 15px 20px; }
             .nav-links { display: none; }
+            .ctrl-hint { display: none; }
         }
     </style>
 </head>
@@ -580,51 +623,89 @@
 
     <section class="feature-showcase" id="showcase">
         <div class="feature-text" id="reveal-text">
-            Реалистичная <span class="highlight">3D-физика</span>, высокая частота кадров и полное погружение — прямо на твоем устройстве.
+            Реалистичная <span class="highlight">3D-физика</span>, свободный открытый мир и полное погружение — прямо на твоем устройстве.
         </div>
     </section>
 
     <section class="games-section" id="games">
         <h2 class="section-title">Наши проекты</h2>
-        <p class="section-subtitle">Выбирай вселенную и начинай играть</p>
+        <p class="section-subtitle">Выбирай вселенную, играй или скачивай на ПК</p>
 
         <div class="games-grid">
+            <!-- Игра 1: Полноценный свободный полет -->
             <div class="game-card">
                 <div>
-                    <span class="game-tag">Авиасимулятор • 3D (Демо доступно!)</span>
-                    <h3>SkyLine Flight Sim</h3>
-                    <p>Пилотирование реактивного истребителя сквозь энергетические кольца. Управляй самолетом мышкой, клавишами WASD или пальцем на смартфоне!</p>
+                    <span class="game-tag">Авиасимулятор • Открытый 3D-Мир</span>
+                    <h3>SkyLine Flight Sim: Open World</h3>
+                    <p>Полный свободный полет на 360°! Взлетай с полосы аэропорта, набирай высоту над морем и горами, убирай шасси, переключай вид из кабины и сажай самолет.</p>
                 </div>
-                <button class="btn" onclick="startFlightGame()">🚀 Играть прямо сейчас</button>
+                <div class="btn-group">
+                    <button class="btn" onclick="startFlightGame()">✈️ Запустить симулятор (Full 3D)</button>
+                    <button class="btn btn-download" onclick="downloadStandaloneGame()">💾 Скачать игру на ПК (.html)</button>
+                </div>
             </div>
 
+            <!-- Игра 2 -->
             <div class="game-card">
                 <div>
                     <span class="game-tag">Автосимулятор • Открытый мир</span>
                     <h3>City Drive: Next-Gen</h3>
                     <p>Свободная езда по ночному мегаполису, детальный тюнинг автомобилей, реалистичная подвеска и трафик с умным ИИ.</p>
                 </div>
-                <button class="btn" onclick="alert('Проект в активной разработке! Скоро появится демо-версия.')">Подробнее</button>
+                <div class="btn-group">
+                    <button class="btn" onclick="alert('Проект в разработке! Скоро будет доступен.')">Подробнее</button>
+                </div>
             </div>
 
+            <!-- Игра 3 -->
             <div class="game-card">
                 <div>
                     <span class="game-tag">Экшен • Песочница</span>
                     <h3>Project: Cyber Core</h3>
                     <p>Динамичный экшен с разрушаемым окружением, кастомной физикой объектов и поддержкой управления как на ПК, так и на смартфонах.</p>
                 </div>
-                <button class="btn" onclick="alert('Скоро открытие бета-теста!')">Предрегистрация</button>
+                <div class="btn-group">
+                    <button class="btn" onclick="alert('Скоро открытие бета-теста!')">Предрегистрация</button>
+                </div>
             </div>
         </div>
     </section>
 
+    <!-- ПОЛНОЭКРАННЫЙ 3D-СИМУЛЯТОР СВОБОДНОГО ПОЛЕТА -->
     <div id="game-modal">
-        <div class="game-hud">
-            <div class="hud-stats">Кольца: <span id="score-val">0</span> | Скорость: <span id="speed-val">450</span> км/ч</div>
-            <button class="close-game-btn" onclick="stopFlightGame()">✕ Выйти</button>
-        </div>
         <canvas id="game-canvas"></canvas>
-        <div class="game-hint">Управление: Мышка / WASD / Стрелки (или води пальцем по экрану телефона)</div>
+
+        <div class="cockpit-hud">
+            <div class="hud-top">
+                <div class="telemetry-box">
+                    СКОРОСТЬ (SPD): <b id="hud-spd">0</b> км/ч<br>
+                    ВЫСОТА (ALT): <b id="hud-alt">0</b> м<br>
+                    ТЯГА (THR): <b id="hud-thr">0</b>%<br>
+                    ШАССИ (GEAR): <b id="hud-gear">ВЫПУЩЕНЫ</b>
+                </div>
+
+                <div class="hud-controls-top">
+                    <button class="hud-btn" onclick="toggleCameraView()">🎥 Камера (C)</button>
+                    <button class="hud-btn" onclick="toggleLandingGear()">⚙️ Шасси (G)</button>
+                    <button class="hud-btn" onclick="respawnPlane()">🔄 На полосу (R)</button>
+                    <button class="close-game-btn" onclick="stopFlightGame()">✕ Выйти</button>
+                </div>
+            </div>
+
+            <div id="stall-alert">⚠️ STALL! СВАЛИВАНИЕ! УВЕЛИЧЬ ТЯГУ!</div>
+            <div class="hud-crosshair"></div>
+
+            <div class="touch-controls">
+                <div class="throttle-panel">
+                    <button class="hud-btn" onmousedown="changeThrottle(15)" ontouchstart="changeThrottle(15)">🔥 Тяга + (Shift)</button>
+                    <button class="hud-btn" onmousedown="changeThrottle(-15)" ontouchstart="changeThrottle(-15)">❄️ Тяга - (Ctrl)</button>
+                </div>
+
+                <div class="ctrl-hint">
+                    <b>Shift / Ctrl</b> — Тяга двигателя &nbsp;|&nbsp; <b>W / S</b> — Нос вниз/вверх (Взлет) &nbsp;|&nbsp; <b>A / D</b> — Крен &nbsp;|&nbsp; <b>Q / E</b> — Поворот &nbsp;|&nbsp; <b>C</b> — Вид из кабины
+                </div>
+            </div>
+        </div>
     </div>
 
     <footer>
@@ -633,7 +714,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // --- СЦЕНАРИЙ ВСТУПИТЕЛЬНОЙ ЗАСТАВКИ (INTRO) ---
+        // --- 1. СЦЕНАРИЙ ВСТУПИТЕЛЬНОЙ ЗАСТАВКИ ---
         window.addEventListener('DOMContentLoaded', () => {
             const overlay = document.getElementById('intro-overlay');
             const shockwave = document.getElementById('shockwave');
@@ -641,13 +722,10 @@
             const letters = document.querySelectorAll('.intro-letter');
             const sub = document.getElementById('intro-sub');
 
-            // Ровно в момент удара логотипа об пол (1.02 сек)
             setTimeout(() => {
-                // Тряска камеры и ударная волна
                 overlay.classList.add('camera-shake');
                 shockwave.classList.add('boom');
 
-                // Разлет искр от удара
                 for (let i = 0; i < 24; i++) {
                     const spark = document.createElement('div');
                     spark.className = 'spark';
@@ -667,27 +745,17 @@
                     });
                 }
 
-                // Постепенно буква за буквой пишется A-WORKS
                 letters.forEach((letter, index) => {
-                    setTimeout(() => {
-                        letter.classList.add('typed');
-                    }, 180 + index * 110);
+                    setTimeout(() => letter.classList.add('typed'), 180 + index * 110);
                 });
 
-                // Появление слова STUDIO
-                setTimeout(() => {
-                    sub.classList.add('typed');
-                }, 1050);
-
+                setTimeout(() => sub.classList.add('typed'), 1050);
             }, 1020);
 
-            // Плавный переход к самому сайту
-            setTimeout(() => {
-                overlay.classList.add('hide-intro');
-            }, 3400);
+            setTimeout(() => overlay.classList.add('hide-intro'), 3400);
         });
 
-        // --- ФОНОВАЯ 3D-СЦЕНА САЙТА ---
+        // --- 2. ФОНОВАЯ 3D-СЦЕНА САЙТА ---
         const canvas = document.getElementById('bg-canvas');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -698,45 +766,30 @@
         const coreGroup = new THREE.Group();
         scene.add(coreGroup);
 
-        const outerGeo = new THREE.IcosahedronGeometry(2.2, 1);
-        const outerMat = new THREE.MeshStandardMaterial({
-            color: 0x00d2ff,
-            wireframe: true,
-            emissive: 0x0044ff,
-            emissiveIntensity: 0.6
-        });
-        const outerMesh = new THREE.Mesh(outerGeo, outerMat);
+        const outerMesh = new THREE.Mesh(
+            new THREE.IcosahedronGeometry(2.2, 1),
+            new THREE.MeshStandardMaterial({ color: 0x00d2ff, wireframe: true, emissive: 0x0044ff, emissiveIntensity: 0.6 })
+        );
         coreGroup.add(outerMesh);
 
-        const innerGeo = new THREE.OctahedronGeometry(1.4, 0);
-        const innerMat = new THREE.MeshStandardMaterial({
-            color: 0x111827,
-            metalness: 0.9,
-            roughness: 0.1
-        });
-        const innerMesh = new THREE.Mesh(innerGeo, innerMat);
+        const innerMesh = new THREE.Mesh(
+            new THREE.OctahedronGeometry(1.4, 0),
+            new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.9, roughness: 0.1 })
+        );
         coreGroup.add(innerMesh);
 
-        const ringGeo = new THREE.TorusGeometry(3.4, 0.03, 16, 100);
-        const ringMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
-        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+        const ringMesh = new THREE.Mesh(
+            new THREE.TorusGeometry(3.4, 0.03, 16, 100),
+            new THREE.MeshBasicMaterial({ color: 0x00d2ff })
+        );
         ringMesh.rotation.x = Math.PI / 2.3;
         coreGroup.add(ringMesh);
 
         const particlesGeo = new THREE.BufferGeometry();
-        const particlesCount = 700;
-        const posArray = new Float32Array(particlesCount * 3);
-        for(let i = 0; i < particlesCount * 3; i++) {
-            posArray[i] = (Math.random() - 0.5) * 25;
-        }
+        const posArray = new Float32Array(700 * 3);
+        for(let i = 0; i < 700 * 3; i++) posArray[i] = (Math.random() - 0.5) * 25;
         particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const particlesMat = new THREE.PointsMaterial({
-            size: 0.03,
-            color: 0x00d2ff,
-            transparent: true,
-            opacity: 0.7
-        });
-        const particlesMesh = new THREE.Points(particlesGeo, particlesMat);
+        const particlesMesh = new THREE.Points(particlesGeo, new THREE.PointsMaterial({ size: 0.03, color: 0x00d2ff, transparent: true, opacity: 0.7 }));
         scene.add(particlesMesh);
 
         const light1 = new THREE.PointLight(0x00d2ff, 3, 20);
@@ -752,14 +805,10 @@
 
         let scrollY = window.scrollY;
         const revealText = document.getElementById('reveal-text');
-
         window.addEventListener('scroll', () => {
             scrollY = window.scrollY;
-            if (scrollY > window.innerHeight * 0.35) {
-                revealText.classList.add('visible');
-            } else {
-                revealText.classList.remove('visible');
-            }
+            if (scrollY > window.innerHeight * 0.35) revealText.classList.add('visible');
+            else revealText.classList.remove('visible');
         });
 
         let mouseX = 0, mouseY = 0;
@@ -786,146 +835,319 @@
         }
         animateBg();
 
-        // --- ВСТРОЕННАЯ 3D-ИГРА: SKYLINE FLIGHT SIM ---
+        // --- 3. ПОЛНОЦЕННЫЙ 3D-АВИАСИМУЛЯТОР С ОТКРЫТЫМ МИРОМ ---
         let gameActive = false;
-        let gameRenderer, gameScene, gameCamera, jetGroup, targetRing, gridHelper;
-        let score = 0, speed = 450;
-        let targetX = 0, targetY = 0;
+        let gameRenderer, gameScene, gameCamera, jetGroup, flameMesh, gearGroup;
+        let firstPersonView = false;
+        let gearDown = true;
+
+        // Физические параметры полета
+        let throttle = 0;       // 0 - 100%
+        let airspeed = 0;       // км/ч
         const keys = {};
 
-        function initGame() {
+        // Звуковой синтезатор турбины (Web Audio API)
+        let audioCtx, engineOsc, engineGain;
+
+        function initEngineSound() {
+            if (audioCtx) return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                engineOsc = audioCtx.createOscillator();
+                engineGain = audioCtx.createGain();
+                engineOsc.type = 'sawtooth';
+                engineOsc.frequency.value = 55;
+                engineGain.gain.value = 0.04;
+                engineOsc.connect(engineGain);
+                engineGain.connect(audioCtx.destination);
+                engineOsc.start();
+            } catch(e) {}
+        }
+
+        function initOpenWorldGame() {
             const gCanvas = document.getElementById('game-canvas');
             gameScene = new THREE.Scene();
-            gameScene.fog = new THREE.FogExp2(0x03050a, 0.025);
+            gameScene.background = new THREE.Color(0x0b1d3a);
+            gameScene.fog = new THREE.FogExp2(0x0b1d3a, 0.00045);
 
-            gameCamera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 500);
-            gameCamera.position.set(0, 2, 8);
-
+            gameCamera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.5, 8000);
             gameRenderer = new THREE.WebGLRenderer({ canvas: gCanvas, antialias: true });
             gameRenderer.setSize(window.innerWidth, window.innerHeight);
 
-            const gLight = new THREE.DirectionalLight(0xffffff, 1.2);
-            gLight.position.set(5, 10, 7);
-            gameScene.add(gLight);
-            gameScene.add(new THREE.AmbientLight(0x00d2ff, 0.6));
+            // Солнечный свет и атмосфера
+            const sunLight = new THREE.DirectionalLight(0xfff4e6, 1.5);
+            sunLight.position.set(600, 1200, 500);
+            gameScene.add(sunLight);
+            gameScene.add(new THREE.HemisphereLight(0x00d2ff, 0x08121e, 0.7));
 
-            gridHelper = new THREE.GridHelper(200, 80, 0x00d2ff, 0x112244);
-            gridHelper.position.y = -5;
-            gameScene.add(gridHelper);
+            // Бескрайний океан
+            const seaGeo = new THREE.PlaneGeometry(30000, 30000);
+            seaGeo.rotateX(-Math.PI / 2);
+            const seaMat = new THREE.MeshStandardMaterial({ color: 0x062846, roughness: 0.3, metalness: 0.6 });
+            gameScene.add(new THREE.Mesh(seaGeo, seaMat));
 
+            // Остров и взлетно-посадочная полоса (ВПП)
+            const islandGeo = new THREE.BoxGeometry(500, 4, 2400);
+            const islandMat = new THREE.MeshStandardMaterial({ color: 0x1a3a2a, roughness: 0.9 });
+            const island = new THREE.Mesh(islandGeo, islandMat);
+            island.position.set(0, -1.5, -800);
+            gameScene.add(island);
+
+            const runwayGeo = new THREE.PlaneGeometry(46, 1800);
+            runwayGeo.rotateX(-Math.PI / 2);
+            const runwayMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+            const runway = new THREE.Mesh(runwayGeo, runwayMat);
+            runway.position.set(0, 0.6, -800);
+            gameScene.add(runway);
+
+            // Огни и разметка полосы
+            for (let z = 0; z > -1650; z -= 60) {
+                const stripe = new THREE.Mesh(
+                    new THREE.PlaneGeometry(2, 28),
+                    new THREE.MeshBasicMaterial({ color: 0xffffff })
+                );
+                stripe.rotation.x = -Math.PI / 2;
+                stripe.position.set(0, 0.7, z);
+                gameScene.add(stripe);
+
+                // Синие посадочные огни по краям ВПП
+                const lLight = new THREE.Mesh(new THREE.SphereGeometry(0.6), new THREE.MeshBasicMaterial({ color: 0x00ffff }));
+                lLight.position.set(-22, 1, z);
+                gameScene.add(lLight);
+
+                const rLight = lLight.clone();
+                rLight.position.set(22, 1, z);
+                gameScene.add(rLight);
+            }
+
+            // Процедурные 3D-горы вокруг архипелага
+            const mountMat = new THREE.MeshStandardMaterial({ color: 0x28354a, roughness: 0.85, flatShading: true });
+            const snowMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5, flatShading: true });
+            for (let i = 0; i < 85; i++) {
+                const h = 140 + Math.random() * 550;
+                const r = 120 + Math.random() * 320;
+                const mGeo = new THREE.ConeGeometry(r, h, 6);
+                const mMesh = new THREE.Mesh(mGeo, mountMat);
+
+                let mx = (Math.random() - 0.5) * 9000;
+                let mz = (Math.random() - 0.5) * 9000;
+                // Не ставим горы прямо на взлетную полосу
+                if (Math.abs(mx) < 550 && mz < 400 && mz > -2000) mx += 900;
+
+                mMesh.position.set(mx, h / 2 - 2, mz);
+                gameScene.add(mMesh);
+
+                if (h > 380) {
+                    const topMesh = new THREE.Mesh(new THREE.ConeGeometry(r * 0.36, h * 0.36, 6), snowMat);
+                    topMesh.position.y = h * 0.33;
+                    mMesh.add(topMesh);
+                }
+            }
+
+            // Объемные 3D-облака на высоте
+            const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.75 });
+            for (let i = 0; i < 65; i++) {
+                const cMesh = new THREE.Mesh(new THREE.BoxGeometry(120 + Math.random()*160, 22, 90 + Math.random()*120), cloudMat);
+                cMesh.position.set((Math.random()-0.5)*8000, 320 + Math.random()*500, (Math.random()-0.5)*8000);
+                gameScene.add(cMesh);
+            }
+
+            // СОЗДАЕМ ДЕТАЛИЗИРОВАННЫЙ ИСТРЕБИТЕЛЬ / ЛАЙНЕР
             jetGroup = new THREE.Group();
-            
-            const bodyGeo = new THREE.ConeGeometry(0.6, 3.2, 6);
+
+            // Фюзеляж
+            const bodyGeo = new THREE.CylinderGeometry(0.45, 0.85, 8.5, 12);
             bodyGeo.rotateX(Math.PI / 2);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.7, roughness: 0.2 });
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.6, roughness: 0.25 });
             jetGroup.add(new THREE.Mesh(bodyGeo, bodyMat));
 
-            const wingGeo = new THREE.BoxGeometry(4.2, 0.08, 1.1);
-            const wingMat = new THREE.MeshStandardMaterial({ color: 0x00d2ff, metalness: 0.5, roughness: 0.3 });
+            // Носовой обтекатель
+            const noseGeo = new THREE.ConeGeometry(0.45, 2.8, 12);
+            noseGeo.rotateX(-Math.PI / 2);
+            const nose = new THREE.Mesh(noseGeo, bodyMat);
+            nose.position.z = -5.65;
+            jetGroup.add(nose);
+
+            // Стеклянная кабина пилота
+            const cockpitGeo = new THREE.BoxGeometry(0.85, 0.65, 2.6);
+            const cockpitMat = new THREE.MeshStandardMaterial({ color: 0x00d2ff, metalness: 0.9, roughness: 0.1, transparent: true, opacity: 0.75 });
+            const cockpit = new THREE.Mesh(cockpitGeo, cockpitMat);
+            cockpit.position.set(0, 0.55, -2.2);
+            jetGroup.add(cockpit);
+
+            // Крылья
+            const wingGeo = new THREE.BoxGeometry(10.5, 0.12, 2.2);
+            const wingMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.5, roughness: 0.3 });
             const wings = new THREE.Mesh(wingGeo, wingMat);
-            wings.position.z = 0.4;
+            wings.position.set(0, 0, -0.3);
             jetGroup.add(wings);
 
-            const tailGeo = new THREE.BoxGeometry(0.1, 0.9, 0.8);
-            const tail = new THREE.Mesh(tailGeo, wingMat);
-            tail.position.set(0, 0.45, 1.1);
-            jetGroup.add(tail);
+            // Хвостовые стабилизаторы
+            const tailWing = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.1, 1.2), wingMat);
+            tailWing.position.set(0, 0.2, 3.6);
+            jetGroup.add(tailWing);
 
-            const flameGeo = new THREE.SphereGeometry(0.32, 12, 12);
-            const flameMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
-            const flame = new THREE.Mesh(flameGeo, flameMat);
-            flame.position.z = 1.65;
-            jetGroup.add(flame);
+            const vTail = new THREE.Mesh(new THREE.BoxGeometry(0.14, 1.9, 1.5), wingMat);
+            vTail.position.set(0, 1.1, 3.5);
+            jetGroup.add(vTail);
+
+            // Шасси (убирающиеся)
+            gearGroup = new THREE.Group();
+            const wheelMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+            const w1 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.2, 10), wheelMat);
+            w1.rotation.z = Math.PI / 2;
+            w1.position.set(0, -0.9, -3.5);
+            const w2 = w1.clone(); w2.position.set(-1.4, -0.9, 0.5);
+            const w3 = w1.clone(); w3.position.set(1.4, -0.9, 0.5);
+            gearGroup.add(w1, w2, w3);
+            jetGroup.add(gearGroup);
+
+            // Пламя форсажа
+            flameMesh = new THREE.Mesh(
+                new THREE.ConeGeometry(0.55, 2.6, 12),
+                new THREE.MeshBasicMaterial({ color: 0x00ffff })
+            );
+            flameMesh.rotation.x = -Math.PI / 2;
+            flameMesh.position.z = 5.4;
+            jetGroup.add(flameMesh);
 
             gameScene.add(jetGroup);
+            respawnPlane();
 
-            const rGeo = new THREE.TorusGeometry(2.3, 0.18, 16, 60);
-            const rMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
-            targetRing = new THREE.Mesh(rGeo, rMat);
-            resetRing();
-            gameScene.add(targetRing);
-
-            window.addEventListener('mousemove', (e) => {
-                if (!gameActive) return;
-                targetX = ((e.clientX / window.innerWidth) - 0.5) * 12;
-                targetY = -((e.clientY / window.innerHeight) - 0.5) * 7;
+            window.addEventListener('keydown', (e) => {
+                keys[e.code] = true;
+                if (e.code === 'KeyC') toggleCameraView();
+                if (e.code === 'KeyG') toggleLandingGear();
+                if (e.code === 'KeyR') respawnPlane();
             });
-
-            window.addEventListener('touchmove', (e) => {
-                if (!gameActive) return;
-                const touch = e.touches[0];
-                targetX = ((touch.clientX / window.innerWidth) - 0.5) * 12;
-                targetY = -((touch.clientY / window.innerHeight) - 0.5) * 7;
-            }, { passive: true });
-
-            window.addEventListener('keydown', (e) => keys[e.code] = true);
             window.addEventListener('keyup', (e) => keys[e.code] = false);
         }
 
-        function resetRing() {
-            targetRing.position.z = -65;
-            targetRing.position.x = (Math.random() - 0.5) * 12;
-            targetRing.position.y = (Math.random() - 0.5) * 6;
+        function respawnPlane() {
+            if (!jetGroup) return;
+            jetGroup.position.set(0, 1.6, 0);
+            jetGroup.rotation.set(0, 0, 0);
+            throttle = 0;
+            airspeed = 0;
+            gearDown = true;
+            if (gearGroup) gearGroup.visible = true;
+            document.getElementById('hud-gear').innerText = 'ВЫПУЩЕНЫ';
+        }
+
+        function toggleCameraView() {
+            firstPersonView = !firstPersonView;
+        }
+
+        function toggleLandingGear() {
+            gearDown = !gearDown;
+            if (gearGroup) gearGroup.visible = gearDown;
+            document.getElementById('hud-gear').innerText = gearDown ? 'ВЫПУЩЕНЫ' : 'УБРАНЫ';
+        }
+
+        function changeThrottle(delta) {
+            throttle = Math.max(0, Math.min(100, throttle + delta));
         }
 
         function startFlightGame() {
             document.getElementById('game-modal').style.display = 'block';
-            if (!gameRenderer) initGame();
+            if (!gameRenderer) initOpenWorldGame();
+            initEngineSound();
             gameActive = true;
-            score = 0;
-            speed = 450;
-            updateHud();
-            resetRing();
-            animateGame();
+            animateOpenWorld();
         }
 
         function stopFlightGame() {
             gameActive = false;
+            if (engineGain) engineGain.gain.value = 0;
             document.getElementById('game-modal').style.display = 'none';
         }
 
-        function updateHud() {
-            document.getElementById('score-val').innerText = score;
-            document.getElementById('speed-val').innerText = Math.round(speed);
-        }
-
-        function animateGame() {
+        function animateOpenWorld() {
             if (!gameActive) return;
-            requestAnimationFrame(animateGame);
+            requestAnimationFrame(animateOpenWorld);
 
-            if (keys['KeyA'] || keys['ArrowLeft']) targetX -= 0.18;
-            if (keys['KeyD'] || keys['ArrowRight']) targetX += 0.18;
-            if (keys['KeyW'] || keys['ArrowUp']) targetY += 0.15;
-            if (keys['KeyS'] || keys['ArrowDown']) targetY -= 0.15;
+            // 1. Управление тягой двигателя
+            if (keys['ShiftLeft'] || keys['ShiftRight']) throttle = Math.min(100, throttle + 0.5);
+            if (keys['ControlLeft'] || keys['ControlRight']) throttle = Math.max(0, throttle - 0.5);
 
-            targetX = Math.max(-7, Math.min(7, targetX));
-            targetY = Math.max(-3.5, Math.min(4.5, targetY));
+            // Расчет скорости и подъемной силы
+            const targetSpeed = throttle * 7.8; // Макс ~780 км/ч
+            airspeed += (targetSpeed - airspeed) * 0.015;
 
-            jetGroup.position.x += (targetX - jetGroup.position.x) * 0.1;
-            jetGroup.position.y += (targetY - jetGroup.position.y) * 0.1;
-            jetGroup.rotation.z = -(targetX - jetGroup.position.x) * 0.45;
-            jetGroup.rotation.x = (targetY - jetGroup.position.y) * 0.25;
+            // 2. Аэродинамическое управление (Тангаж, Крен, Рыскание)
+            const controlPower = Math.min(1, airspeed / 140); // Самолет слушается руля на скорости
+            if (keys['KeyS'] || keys['ArrowDown']) jetGroup.rotateX(0.022 * controlPower);  // Штурвал на себя (взлет)
+            if (keys['KeyW'] || keys['ArrowUp'])   jetGroup.rotateX(-0.022 * controlPower); // Нос вниз
+            if (keys['KeyA'] || keys['ArrowLeft']) jetGroup.rotateZ(0.038 * controlPower);  // Крен влево
+            if (keys['KeyD'] || keys['ArrowRight'])jetGroup.rotateZ(-0.038 * controlPower); // Крен вправо
+            if (keys['KeyQ']) jetGroup.rotateY(0.018 * controlPower);
+            if (keys['KeyE']) jetGroup.rotateY(-0.018 * controlPower);
 
-            const step = 0.65 + (score * 0.03);
-            gridHelper.position.z = (gridHelper.position.z + step) % 5;
-            targetRing.position.z += step;
-            targetRing.rotation.z += 0.04;
+            // Перемещение самолета вперед по вектору носа
+            const moveStep = (airspeed / 3.6) * 0.04;
+            jetGroup.translateZ(-moveStep);
 
-            if (targetRing.position.z > 0 && targetRing.position.z < 1.5) {
-                const dist = Math.hypot(jetGroup.position.x - targetRing.position.x, jetGroup.position.y - targetRing.position.y);
-                if (dist < 2.6) {
-                    score++;
-                    speed += 25;
-                    updateHud();
-                    resetRing();
-                }
+            // Гравитация и подъемная сила крыла
+            const lift = Math.min(1, airspeed / 195);
+            if (jetGroup.position.y > 1.6) {
+                jetGroup.position.y -= (1 - lift) * 0.45;
             }
 
-            if (targetRing.position.z > 8) {
-                resetRing();
+            // Контакт с землей / ВПП
+            if (jetGroup.position.y <= 1.6) {
+                jetGroup.position.y = 1.6;
+                // Выравнивание на полосе
+                jetGroup.rotation.z *= 0.9;
+                if (jetGroup.rotation.x < 0) jetGroup.rotation.x *= 0.85;
             }
+
+            // Проверка на сваливание (STALL) в воздухе
+            const stallBox = document.getElementById('stall-alert');
+            if (jetGroup.position.y > 25 && airspeed < 155) {
+                stallBox.style.display = 'block';
+                jetGroup.rotateX(-0.012); // Нос сам клюет вниз при потере скорости
+            } else {
+                stallBox.style.display = 'none';
+            }
+
+            // Пламя турбины и звук
+            const flameScale = 0.2 + (throttle / 100) * 1.6;
+            flameMesh.scale.set(1, flameScale, 1);
+            if (engineOsc && engineGain) {
+                engineOsc.frequency.value = 50 + throttle * 3.2 + (airspeed * 0.15);
+                engineGain.gain.value = 0.02 + (throttle / 100) * 0.08;
+            }
+
+            // Камера (Вид от 3-го лица или из кабины пилота)
+            if (firstPersonView) {
+                const camPos = new THREE.Vector3(0, 0.85, -2.5).applyMatrix4(jetGroup.matrixWorld);
+                const lookPos = new THREE.Vector3(0, 0.8, -50).applyMatrix4(jetGroup.matrixWorld);
+                gameCamera.position.copy(camPos);
+                gameCamera.lookAt(lookPos);
+            } else {
+                const camOffset = new THREE.Vector3(0, 4.2, 16.5).applyMatrix4(jetGroup.matrixWorld);
+                gameCamera.position.lerp(camOffset, 0.18);
+                gameCamera.lookAt(jetGroup.position);
+            }
+
+            // Обновление приборов HUD
+            document.getElementById('hud-spd').innerText = Math.round(airspeed);
+            document.getElementById('hud-alt').innerText = Math.max(0, Math.round(jetGroup.position.y - 1.6));
+            document.getElementById('hud-thr').innerText = Math.round(throttle);
 
             gameRenderer.render(gameScene, gameCamera);
+        }
+
+        // Функция скачивания игры отдельным файлом на ПК
+        function downloadStandaloneGame() {
+            const fullHtml = document.documentElement.outerHTML;
+            const blob = new Blob([fullHtml], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'SkyLine_Flight_Sim_OpenWorld.html';
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         window.addEventListener('resize', () => {
