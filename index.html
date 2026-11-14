@@ -1,1536 +1,325 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A-Works Studio — PRO Flight Simulator</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-        }
+<!-- МОДУЛЬ DYNAMIC EDIT ТРЕЙЛЕРА В СТИЛЕ SAMSUNG -->
+<style>
+    #trailer-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        z-index: 20000;
+        pointer-events: auto;
+        overflow: hidden;
+        background: transparent;
+    }
+    /* Резкая белая/неоновая вспышка на переходах (Flash Cut) */
+    #trailer-flash {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: #ffffff;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.18s ease-out;
+        z-index: 2;
+    }
+    /* Кинематографичные черные полосы сверху и снизу */
+    .cinema-bar {
+        position: absolute;
+        left: 0; width: 100%; height: 11vh;
+        background: #000;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+    }
+    .bar-top { top: 0; border-bottom: 1px solid rgba(0, 210, 255, 0.3); }
+    .bar-bottom { bottom: 0; border-top: 1px solid rgba(0, 210, 255, 0.3); }
 
-        body {
-            background-color: #050508;
-            color: #ffffff;
-            overflow-x: hidden;
-            scroll-behavior: smooth;
-        }
+    /* Огромные титры в стиле презентации Samsung */
+    #trailer-caption-box {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        z-index: 4;
+        width: 90%;
+        pointer-events: none;
+    }
+    #trailer-main-text {
+        font-size: clamp(38px, 7vw, 92px);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        color: #fff;
+        text-shadow: 0 0 40px rgba(0, 210, 255, 0.9), 0 10px 30px #000;
+        transform: scale(1.3);
+        opacity: 0;
+        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s;
+    }
+    #trailer-sub-text {
+        font-size: clamp(14px, 2vw, 24px);
+        color: #00ffff;
+        letter-spacing: 8px;
+        text-transform: uppercase;
+        font-weight: 800;
+        margin-top: 12px;
+        text-shadow: 0 0 20px #000;
+    }
+    .trailer-btn-launch {
+        margin-top: 16px;
+        padding: 16px 34px;
+        border-radius: 16px;
+        background: linear-gradient(90deg, #ff0055, #ff6600);
+        color: #fff;
+        font-size: 17px;
+        font-weight: 800;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 0 35px rgba(255, 0, 85, 0.6);
+        transition: 0.3s;
+    }
+    .trailer-btn-launch:hover {
+        transform: scale(1.06);
+        box-shadow: 0 0 50px rgba(255, 0, 85, 0.9);
+    }
+</style>
 
-        /* --- КИНЕМАТОГРАФИЧНОЕ ИНТРО ПРИ ВХОДЕ --- */
-        #intro-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: radial-gradient(circle at center, #0a1124 0%, #030407 80%);
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            perspective: 900px;
-            overflow: hidden;
-            transition: opacity 0.8s ease, visibility 0.8s;
-        }
-
-        #intro-overlay.hide-intro {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .intro-floor {
-            position: absolute;
-            width: 200vw;
-            height: 120vh;
-            bottom: -45vh;
-            background-image: 
-                linear-gradient(rgba(0, 210, 255, 0.2) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 210, 255, 0.2) 1px, transparent 1px);
-            background-size: 50px 50px;
-            transform: rotateX(75deg);
-            mask-image: radial-gradient(circle at center, black 10%, transparent 70%);
-            -webkit-mask-image: radial-gradient(circle at center, black 10%, transparent 70%);
-        }
-
-        .flying-logo {
-            width: 110px;
-            height: 110px;
-            border-radius: 26px;
-            background: linear-gradient(135deg, #00d2ff 0%, #0044ff 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 64px;
-            font-weight: 900;
-            color: #ffffff;
-            box-shadow: 0 0 50px rgba(0, 210, 255, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.6);
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            position: relative;
-            z-index: 3;
-            transform: translate3d(0, -600px, 700px) rotateX(60deg) rotateZ(-35deg);
-            opacity: 0;
-            animation: logoCrash 1.2s cubic-bezier(0.6, 0.04, 0.98, 0.335) forwards;
-        }
-
-        @keyframes logoCrash {
-            0% { opacity: 0; transform: translate3d(0, -650px, 750px) rotateX(65deg) rotateY(40deg) rotateZ(-45deg) scale(2.6); }
-            20% { opacity: 1; }
-            82% {
-                transform: translate3d(0, 35px, 0) rotateX(18deg) rotateY(0deg) rotateZ(0deg) scale(1.25, 0.72);
-                box-shadow: 0 0 120px #00ffff, 0 0 200px #0066ff;
-            }
-            100% { opacity: 1; transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1); }
-        }
-
-        .shockwave {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 5px solid #00ffff;
-            box-shadow: 0 0 50px #00d2ff, inset 0 0 30px #00d2ff;
-            opacity: 0;
-            transform: translateY(35px) rotateX(72deg) scale(0.1);
-            z-index: 2;
-        }
-
-        .shockwave.boom { animation: waveSpread 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes waveSpread {
-            0% { opacity: 1; transform: translateY(35px) rotateX(72deg) scale(0.3); }
-            100% { opacity: 0; transform: translateY(35px) rotateX(72deg) scale(18); border-width: 1px; }
-        }
-
-        .sparks-box { position: absolute; z-index: 4; pointer-events: none; }
-        .spark {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #00ffff;
-            box-shadow: 0 0 12px #00ffff;
-            opacity: 0;
-        }
-
-        .intro-title {
-            margin-top: 32px;
-            display: flex;
-            gap: 6px;
-            font-size: clamp(38px, 7vw, 74px);
-            font-weight: 900;
-            letter-spacing: 8px;
-            z-index: 3;
-        }
-
-        .intro-letter {
-            opacity: 0;
-            transform: translateY(25px) scale(0.7);
-            display: inline-block;
-            background: linear-gradient(180deg, #ffffff 0%, #00d2ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 18px rgba(0, 210, 255, 0.7));
-            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .intro-letter.typed { opacity: 1; transform: translateY(0) scale(1); }
-        .intro-sub {
-            margin-top: 8px;
-            font-size: 14px;
-            letter-spacing: 14px;
-            color: #94a3b8;
-            text-transform: uppercase;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: 0.6s ease;
-            z-index: 3;
-        }
-        .intro-sub.typed { opacity: 1; transform: translateY(0); }
-
-        .skip-intro-btn {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #94a3b8;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            z-index: 10;
-            font-size: 12px;
-        }
-
-        .camera-shake { animation: shakeScreen 0.45s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shakeScreen {
-            10%, 90% { transform: translate3d(-6px, 4px, 0); }
-            20%, 80% { transform: translate3d(8px, -6px, 0); }
-            30%, 50%, 70% { transform: translate3d(-10px, -4px, 0); }
-            40%, 60% { transform: translate3d(10px, 6px, 0); }
-        }
-
-        /* --- ОСНОВНОЙ САЙТ --- */
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 20px 50px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(5, 5, 8, 0.5);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            z-index: 100;
-        }
-
-        .logo {
-            font-size: 22px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: linear-gradient(90deg, #fff, #00d2ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .nav-links a {
-            color: #aaa;
-            text-decoration: none;
-            margin-left: 30px;
-            font-size: 14px;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-        .nav-links a:hover { color: #fff; }
-
-        .hero {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 0 20px;
-            position: relative;
-        }
-
-        .badge {
-            padding: 6px 16px;
-            border-radius: 30px;
-            background: rgba(0, 210, 255, 0.12);
-            border: 1px solid rgba(0, 210, 255, 0.4);
-            color: #00d2ff;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-        }
-
-        .hero h1 {
-            font-size: clamp(42px, 8vw, 88px);
-            font-weight: 900;
-            line-height: 1.05;
-            letter-spacing: -2px;
-            margin-bottom: 20px;
-            background: linear-gradient(180deg, #ffffff 0%, #7a8ba8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero p {
-            font-size: clamp(16px, 2vw, 22px);
-            color: #94a3b8;
-            max-width: 650px;
-            margin-bottom: 35px;
-        }
-
-        .hero-btn {
-            padding: 18px 38px;
-            border-radius: 16px;
-            background: linear-gradient(90deg, #00d2ff, #0055ff);
-            color: #fff;
-            font-size: 18px;
-            font-weight: 800;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 0 35px rgba(0, 210, 255, 0.5);
-            transition: 0.3s;
-        }
-        .hero-btn:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(0, 210, 255, 0.8); }
-
-        .feature-showcase {
-            height: 70vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 0 20px;
-        }
-
-        .feature-text {
-            font-size: clamp(28px, 5vw, 54px);
-            font-weight: 800;
-            max-width: 850px;
-            line-height: 1.2;
-            opacity: 0;
-            transform: translateY(40px);
-            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .feature-text.visible { opacity: 1; transform: translateY(0); }
-        .highlight { color: #00d2ff; text-shadow: 0 0 30px rgba(0, 210, 255, 0.4); }
-
-        .games-section {
-            min-height: 100vh;
-            padding: 80px 8vw;
-            position: relative;
-            z-index: 2;
-        }
-
-        .section-title { font-size: clamp(32px, 4vw, 48px); font-weight: 800; margin-bottom: 12px; }
-        .section-subtitle { color: #94a3b8; font-size: 18px; margin-bottom: 50px; }
-
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 30px;
-        }
-
-        .game-card {
-            background: rgba(15, 20, 32, 0.7);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 24px;
-            padding: 32px;
-            transition: all 0.4s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .game-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(0, 210, 255, 0.6);
-            box-shadow: 0 20px 50px rgba(0, 210, 255, 0.2);
-        }
-
-        .game-tag {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 5px 12px;
-            border-radius: 20px;
-            background: rgba(0, 210, 255, 0.15);
-            color: #00d2ff;
-            margin-bottom: 18px;
-            width: fit-content;
-        }
-
-        .game-card h3 { font-size: 26px; margin-bottom: 12px; font-weight: 800; }
-        .game-card p { color: #94a3b8; font-size: 15px; line-height: 1.6; margin-bottom: 25px; }
-
-        .btn-group { display: flex; flex-direction: column; gap: 10px; }
-        .btn {
-            padding: 14px 20px;
-            border-radius: 14px;
-            background: linear-gradient(90deg, #00d2ff, #0066ff);
-            color: #fff;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            font-size: 15px;
-            transition: 0.3s;
-        }
-        .btn:hover { box-shadow: 0 0 25px rgba(0, 210, 255, 0.6); transform: scale(1.02); }
-        .btn-download {
-            background: rgba(0, 210, 255, 0.12);
-            border: 1px solid rgba(0, 210, 255, 0.5);
-            color: #00d2ff;
-        }
-
-        /* --- ПРОФЕССИОНАЛЬНЫЙ АВИАСИМУЛЯТОР (AAA HUD & HANGAR) --- */
-        #game-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-            z-index: 9999;
-            touch-action: none;
-            user-select: none;
-        }
-
-        #game-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        /* Меню выбора самолета (Ангар перед взлетом) */
-        #hangar-menu {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(4, 8, 18, 0.88);
-            backdrop-filter: blur(14px);
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .hangar-title {
-            font-size: clamp(28px, 4vw, 44px);
-            font-weight: 900;
-            margin-bottom: 10px;
-            color: #fff;
-            text-align: center;
-        }
-
-        .hangar-sub {
-            color: #00d2ff;
-            margin-bottom: 35px;
-            font-size: 16px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .aircraft-cards {
-            display: flex;
-            gap: 25px;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 900px;
-        }
-
-        .aircraft-card {
-            background: rgba(15, 25, 45, 0.9);
-            border: 2px solid rgba(0, 210, 255, 0.35);
-            border-radius: 20px;
-            padding: 28px;
-            width: 340px;
-            cursor: pointer;
-            transition: 0.3s;
-            text-align: left;
-        }
-
-        .aircraft-card:hover {
-            border-color: #00ffff;
-            transform: translateY(-8px);
-            box-shadow: 0 15px 40px rgba(0, 210, 255, 0.3);
-        }
-
-        .aircraft-card h4 { font-size: 24px; margin-bottom: 8px; color: #fff; }
-        .aircraft-specs {
-            font-size: 13px;
-            color: #00ff88;
-            font-family: monospace;
-            margin-bottom: 14px;
-            line-height: 1.5;
-        }
-        .aircraft-card p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; }
-
-        /* Боевой ИЛС (HUD) */
-        .cockpit-hud {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 18px;
-        }
-
-        .hud-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .left-panels {
-            display: flex;
-            gap: 14px;
-            align-items: flex-start;
-        }
-
-        .telemetry-box {
-            background: rgba(4, 14, 24, 0.78);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 255, 136, 0.55);
-            padding: 12px 18px;
-            border-radius: 12px;
-            color: #00ff88;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.55;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
-        }
-        .telemetry-box b { color: #ffffff; }
-
-        /* Радар (Миникарта) */
-        #radar-canvas {
-            width: 135px;
-            height: 135px;
-            background: rgba(2, 18, 12, 0.8);
-            border: 2px solid #00ff88;
-            border-radius: 50%;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.25);
-        }
-
-        /* Центральный авиагоризонт (Pitch Ladder) */
-        .hud-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 240px;
-            height: 240px;
-            border: 1px solid rgba(0, 255, 136, 0.25);
-            border-radius: 50%;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #horizon-line {
-            width: 160px;
-            height: 2px;
-            background: #00ff88;
-            position: relative;
-            box-shadow: 0 0 8px #00ff88;
-        }
-
-        #horizon-line::before, #horizon-line::after {
-            content: '';
-            position: absolute;
-            width: 40px;
-            height: 1px;
-            background: rgba(0, 255, 136, 0.7);
-            left: 60px;
-        }
-        #horizon-line::before { top: -35px; }
-        #horizon-line::after { bottom: -35px; }
-
-        .crosshair-dot {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border: 2px solid #00ffff;
-            border-radius: 50%;
-        }
-
-        /* Переплет кабины пилота при виде от 1-го лица */
-        #cockpit-frame {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 24px solid #0f172a;
-            border-bottom: 110px solid #0b1120;
-            pointer-events: none;
-            box-shadow: inset 0 0 80px rgba(0,0,0,0.9);
-        }
-
-        #stall-alert {
-            position: absolute;
-            top: 20%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 0, 50, 0.9);
-            color: #fff;
-            padding: 10px 26px;
-            border-radius: 8px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            font-size: 18px;
-            display: none;
-            animation: blinkStall 0.3s infinite alternate;
-        }
-        @keyframes blinkStall {
-            from { opacity: 1; transform: translateX(-50%) scale(1); }
-            to { opacity: 0.25; transform: translateX(-50%) scale(1.06); }
-        }
-
-        .hud-controls-top {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            pointer-events: auto;
-        }
-
-        .hud-btn {
-            background: rgba(12, 22, 40, 0.85);
-            color: #00d2ff;
-            border: 1px solid rgba(0, 210, 255, 0.5);
-            padding: 9px 14px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .hud-btn:hover { background: rgba(0, 210, 255, 0.25); color: #fff; }
-        .hud-btn-fire {
-            background: rgba(255, 60, 0, 0.25);
-            border-color: #ff4400;
-            color: #ff8800;
-        }
-
-        .close-game-btn {
-            background: rgba(255, 35, 65, 0.9);
-            color: #fff;
-            border: none;
-            padding: 9px 16px;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .touch-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            width: 100%;
-            pointer-events: auto;
-            z-index: 5;
-        }
-
-        .throttle-panel { display: flex; gap: 8px; flex-wrap: wrap; }
-
-        .ctrl-hint {
-            background: rgba(4, 10, 20, 0.8);
-            padding: 10px 16px;
-            border-radius: 10px;
-            color: #cbd5e1;
-            font-size: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        footer {
-            text-align: center;
-            padding: 50px 20px;
-            color: #475569;
-            font-size: 14px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        @media (max-width: 768px) {
-            header { padding: 15px 20px; }
-            .nav-links, .ctrl-hint { display: none; }
-            #radar-canvas { width: 95px; height: 95px; }
-        }
-    </style>
-</head>
-<body>
-
-    <!-- АНИМАЦИЯ ВХОДА: ЛЕТИТ ЛОГОТИП, ВРЕЗАЕТСЯ В ПОЛ И ПИШЕТСЯ A-WORKS -->
-    <div id="intro-overlay">
-        <div class="intro-floor"></div>
-        <div class="flying-logo">A</div>
-        <div class="shockwave" id="shockwave"></div>
-        <div class="sparks-box" id="sparks-box"></div>
-
-        <div class="intro-title">
-            <span class="intro-letter">A</span>
-            <span class="intro-letter">-</span>
-            <span class="intro-letter">W</span>
-            <span class="intro-letter">O</span>
-            <span class="intro-letter">R</span>
-            <span class="intro-letter">K</span>
-            <span class="intro-letter">S</span>
-        </div>
-        <div class="intro-sub" id="intro-sub">STUDIO</div>
-        <button class="skip-intro-btn" onclick="document.getElementById('intro-overlay').classList.add('hide-intro')">Пропустить ➔</button>
+<div id="trailer-overlay">
+    <div id="trailer-flash"></div>
+    <div class="cinema-bar bar-top">
+        <div style="font-weight:900; letter-spacing:3px; color:#00d2ff;">A-WORKS STUDIO // OFFICIAL EDIT</div>
+        <button class="close-game-btn" onclick="stopSamsungTrailer()">✕ Закрыть трейлер</button>
     </div>
-
-    <canvas id="bg-canvas"></canvas>
-
-    <header>
-        <div class="logo">A-Works Studio</div>
-        <nav class="nav-links">
-            <a href="#showcase">Движок</a>
-            <a href="#games">Симуляторы</a>
-        </nav>
-    </header>
-
-    <section class="hero">
-        <div class="badge">PRO 3D WebGL Engine • 60 FPS</div>
-        <h1>БУДУЩЕЕ ИГР<br>В ТВОИХ РУКАХ</h1>
-        <p>Авиасимулятор нового поколения с открытым миром, выбором Boeing 737-800 или F-22 Raptor, радаром, сменой времени суток и боевой системой.</p>
-        <button class="hero-btn" onclick="startFlightGame()">✈️ ЗАПУСТИТЬ SKYLINE PRO</button>
-    </section>
-
-    <section class="feature-showcase" id="showcase">
-        <div class="feature-text" id="reveal-text">
-            Реалистичная <span class="highlight">аэродинамика</span>, процедурные горы, боевой радар и живой звук турбин.
-        </div>
-    </section>
-
-    <section class="games-section" id="games">
-        <h2 class="section-title">Наши проекты</h2>
-        <p class="section-subtitle">Выбирай самолет, взлетай с полосы или скачивай на ПК</p>
-
-        <div class="games-grid">
-            <div class="game-card">
-                <div>
-                    <span class="game-tag">PRO Edition • Свободный Полет + Бой</span>
-                    <h3>SkyLine Flight Sim: PRO</h3>
-                    <p>Пилотируй лайнер Boeing 737-800 или боевой истребитель F-22 Raptor! Аэропорт с диспетчерской вышкой, радар, закрылки, ракеты, пулемет и смена дня и ночи.</p>
-                </div>
-                <div class="btn-group">
-                    <button class="btn" onclick="startFlightGame()">🚀 Играть в PRO-версию (Full 3D)</button>
-                    <button class="btn btn-download" onclick="downloadStandaloneGame()">💾 Скачать игру на ПК (.html)</button>
-                </div>
-            </div>
-
-            <div class="game-card">
-                <div>
-                    <span class="game-tag">Автосимулятор • Открытый мир</span>
-                    <h3>City Drive: Next-Gen</h3>
-                    <p>Свободная езда по ночному мегаполису, детальный тюнинг автомобилей, реалистичная подвеска и трафик с умным ИИ.</p>
-                </div>
-                <div class="btn-group">
-                    <button class="btn" onclick="alert('Следующим шагом можем встроить сюда 3D-автосимулятор!')">Скоро</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ПОЛНОЭКРАННЫЙ 3D-АВИАСИМУЛЯТОР -->
-    <div id="game-modal">
-        <!-- АНГАР ВЫБОРА САМОЛЕТА -->
-        <div id="hangar-menu">
-            <div class="hangar-title">ВЫБЕРИ СВОЙ САМОЛЕТ</div>
-            <div class="hangar-sub">A-Works Flight Dynamics Engine</div>
-            <div class="aircraft-cards">
-                <div class="aircraft-card" onclick="selectAircraft('boeing')">
-                    <h4>✈️ Boeing 737-800</h4>
-                    <div class="aircraft-specs">МАКС. СКОРОСТЬ: 850 км/ч<br>ДВИГАТЕЛИ: 2x Turbofan CFM56<br>РЕЖИМ: Гражданская авиация</div>
-                    <p>Тяжелый пассажирский авиалайнер с двумя крыльевыми турбинами, мягкой плавной физикой, закрылками и бортовыми огнями.</p>
-                    <button class="btn" style="width:100%">Выбрать Boeing 737</button>
-                </div>
-                <div class="aircraft-card" onclick="selectAircraft('raptor')">
-                    <h4>🦅 F-22 Raptor (Боевой)</h4>
-                    <div class="aircraft-specs">МАКС. СКОРОСТЬ: 1450 км/ч (Форсаж)<br>ВООРУЖЕНИЕ: Пулемет + Ракеты AIM-9<br>РЕЖИМ: Сверхзвуковой перехватчик</div>
-                    <p>Маневренный истребитель 5-го поколения. Оснащен спаренным форсажем, скорострельной пушкой и ракетами для уничтожения воздушных целей.</p>
-                    <button class="btn" style="width:100%">Выбрать F-22 Raptor</button>
-                </div>
-            </div>
-        </div>
-
-        <canvas id="game-canvas"></canvas>
-        <div id="cockpit-frame"></div>
-
-        <div class="cockpit-hud">
-            <div class="hud-top">
-                <div class="left-panels">
-                    <canvas id="radar-canvas" width="140" height="140"></canvas>
-                    <div class="telemetry-box">
-                        БОРТ: <b id="hud-plane">F-22 RAPTOR</b><br>
-                        СКОРОСТЬ (IAS): <b id="hud-spd">0</b> км/ч<br>
-                        ВЫСОТА (ALT): <b id="hud-alt">0</b> м<br>
-                        ТЯГА (THR): <b id="hud-thr">0</b>% | ПЕРЕГРУЗКА: <b id="hud-g">1.0</b>G<br>
-                        ШАССИ: <b id="hud-gear">ВЫПУЩ</b> | ЗАКРЫЛКИ: <b id="hud-flaps">0°</b><br>
-                        СБИТО ЦЕЛЕЙ: <b id="hud-kills">0</b>
-                    </div>
-                </div>
-
-                <div class="hud-controls-top">
-                    <button class="hud-btn" onclick="openHangar()">🛩️ Сменить борт</button>
-                    <button class="hud-btn" onclick="toggleCameraView()">🎥 Камера (C)</button>
-                    <button class="hud-btn" onclick="toggleLandingGear()">⚙️ Шасси (G)</button>
-                    <button class="hud-btn" onclick="toggleFlaps()">🪽 Закрылки (V)</button>
-                    <button class="hud-btn" onclick="cycleTimeOfDay()">🌅 Время суток (T)</button>
-                    <button class="hud-btn" onclick="respawnPlane()">🔄 На ВПП (R)</button>
-                    <button class="close-game-btn" onclick="stopFlightGame()">✕ Выйти</button>
-                </div>
-            </div>
-
-            <div id="stall-alert">⚠️ STALL WARNING! СВАЛИВАНИЕ! ОПУСТИ НОС И ДАЙ ТЯГУ!</div>
-
-            <div class="hud-center">
-                <div id="horizon-line"></div>
-                <div class="crosshair-dot"></div>
-            </div>
-
-            <div class="touch-controls">
-                <div class="throttle-panel">
-                    <button class="hud-btn" onmousedown="changeThrottle(20)" ontouchstart="changeThrottle(20)">🔥 Тяга + (Shift)</button>
-                    <button class="hud-btn" onmousedown="changeThrottle(-20)" ontouchstart="changeThrottle(-20)">❄️ Тяга - (Ctrl)</button>
-                    <button class="hud-btn hud-btn-fire" onmousedown="fireBullet()" ontouchstart="fireBullet()">💥 Пулемет (Space)</button>
-                    <button class="hud-btn hud-btn-fire" onmousedown="fireMissile()" ontouchstart="fireMissile()">🚀 Ракета (F)</button>
-                </div>
-
-                <div class="ctrl-hint">
-                    <b>Shift/Ctrl</b> Тяга | <b>S/W</b> Взлет/Пике | <b>A/D</b> Крен | <b>Q/E</b> Руль | <b>Space</b> Пулемет | <b>F</b> Ракета | <b>B</b> Тормоз | <b>C</b> Кабина
-                </div>
-            </div>
-        </div>
+    <div id="trailer-caption-box">
+        <div id="trailer-main-text">A-WORKS STUDIO</div>
+        <div id="trailer-sub-text">NEXT-GEN WEB ENGINE</div>
     </div>
+    <div class="cinema-bar bar-bottom">
+        <div id="rec-status" style="color:#00ff88; font-family:monospace; font-size:14px;">🎵 SAMSUNG BEAT SYNC: ACTIVE</div>
+        <button class="hud-btn" onclick="stopSamsungTrailer(); startFlightGame();">🚀 Сразу играть</button>
+    </div>
+</div>
 
-    <footer>
-        © 2026 A-Works Studio. PRO Flight Engine powered by Three.js & WebAudio Synthesizer.
-    </footer>
+<script>
+    // Добавляем кнопки запуска трейлера прямо на главный экран сайта
+    window.addEventListener('DOMContentLoaded', () => {
+        const heroSection = document.querySelector('.hero');
+        if (heroSection) {
+            const btnWrap = document.createElement('div');
+            btnWrap.style.display = 'flex';
+            btnWrap.style.gap = '15px';
+            btnWrap.style.flexWrap = 'wrap';
+            btnWrap.style.justifyContent = 'center';
+            btnWrap.style.marginTop = '15px';
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        // --- 1. СЦЕНАРИЙ КИНЕМАТОГРАФИЧНОЙ ЗАСТАВКИ ---
-        window.addEventListener('DOMContentLoaded', () => {
-            const overlay = document.getElementById('intro-overlay');
-            const shockwave = document.getElementById('shockwave');
-            const sparksBox = document.getElementById('sparks-box');
-            const letters = document.querySelectorAll('.intro-letter');
-            const sub = document.getElementById('intro-sub');
+            const tBtn = document.createElement('button');
+            tBtn.className = 'trailer-btn-launch';
+            tBtn.innerHTML = '🎬 СМОТРЕТЬ ТРЕЙЛЕР (SAMSUNG EDIT)';
+            tBtn.onclick = () => startSamsungTrailer(false);
 
+            const recBtn = document.createElement('button');
+            recBtn.className = 'trailer-btn-launch';
+            recBtn.style.background = 'linear-gradient(90deg, #7000ff, #00d2ff)';
+            recBtn.innerHTML = '🔴 АВТО-ЗАПИСЬ ТРЕЙЛЕРА ДЛЯ YOUTUBE';
+            recBtn.onclick = () => startSamsungTrailer(true);
+
+            btnWrap.appendChild(tBtn);
+            btnWrap.appendChild(recBtn);
+            heroSection.appendChild(btnWrap);
+        }
+    });
+
+    let trailerInterval = null;
+    let trailerCamAnim = null;
+    let trailerActive = false;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+
+    // Сцены трейлера под каждый удар бита (Резкие переходы: Сайт -> Boeing -> F-22 -> Бой -> Финал)
+    const trailerCuts = [
+        { title: "A-WORKS STUDIO", sub: "ПРЕДСТАВЛЯЕТ НОВУЮ ЭРУ", mode: "site", fov: 55 },
+        { title: "БЕЗ ПАУЗ. 60 FPS.", sub: "ИНТЕРАКТИВНЫЙ 3D-САЙТ", mode: "site_zoom", fov: 40 },
+        { title: "SKYLINE FLIGHT PRO", sub: "ОТКРЫТЫЙ МИР И ГОРЫ", mode: "boeing_flyby", plane: "boeing", time: 0 },
+        { title: "BOEING 737-800", sub: "ГРАЖДАНСКАЯ АВИАЦИЯ", mode: "boeing_wing", plane: "boeing", time: 1 },
+        { title: "F-22 RAPTOR", sub: "СВЕРХЗВУКОВОЙ ПЕРЕХВАТЧИК", mode: "raptor_afterburner", plane: "raptor", time: 1 },
+        { title: "ПОЛНЫЙ ФОРСАЖ", sub: "1450 КМ/Ч НАД ОКЕАНОМ", mode: "raptor_cockpit", plane: "raptor", time: 2 },
+        { title: "БОЕВАЯ СИСТЕМА", sub: "РАКЕТЫ И ПУЛЕМЕТ ВУЛКАН", mode: "raptor_combat", plane: "raptor", time: 0 },
+        { title: "ИГРАЙ ПРЯМО СЕЙЧАС", sub: "БЕСПЛАТНО НА ПК И СМАРТФОНАХ", mode: "finale", plane: "raptor", time: 1 }
+    ];
+
+    // Генератор мощного баса и синт-бита как в рекламах Samsung
+    function playSamsungBeat(cutIndex) {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+
+        // Мощный удар бочки (Kick Drop) + Sub Bass
+        const kickOsc = audioCtx.createOscillator();
+        const kickGain = audioCtx.createGain();
+        kickOsc.type = 'sine';
+        kickOsc.frequency.setValueAtTime(150, now);
+        kickOsc.frequency.exponentialRampToValueAtTime(32, now + 0.35);
+        kickGain.gain.setValueAtTime(0.6, now);
+        kickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        kickOsc.connect(kickGain);
+        kickGain.connect(audioCtx.destination);
+        kickOsc.start(now);
+        kickOsc.stop(now + 0.4);
+
+        // Резкий киберпанк-аккорд на переход (Synth Brass)
+        const notes = [110, 130.81, 146.83, 164.81, 196.00, 220, 261.63, 293.66];
+        const synthOsc = audioCtx.createOscillator();
+        const synthGain = audioCtx.createGain();
+        synthOsc.type = 'sawtooth';
+        synthOsc.frequency.setValueAtTime(notes[cutIndex % notes.length], now);
+        synthGain.gain.setValueAtTime(0.18, now);
+        synthGain.gain.exponentialRampToValueAtTime(0.008, now + 1.4);
+        synthOsc.connect(synthGain);
+        synthGain.connect(audioCtx.destination);
+        synthOsc.start(now);
+        synthOsc.stop(now + 1.45);
+
+        // Быстрый хай-хэт ритм между кадрами
+        for (let b = 1; b <= 3; b++) {
             setTimeout(() => {
-                overlay.classList.add('camera-shake');
-                shockwave.classList.add('boom');
-
-                for (let i = 0; i < 24; i++) {
-                    const spark = document.createElement('div');
-                    spark.className = 'spark';
-                    sparksBox.appendChild(spark);
-                    const angle = (Math.PI * 2 * i) / 24;
-                    const vel = 90 + Math.random() * 140;
-                    spark.animate([
-                        { transform: 'translate(0, 20px) scale(1.4)', opacity: 1 },
-                        { transform: `translate(${Math.cos(angle)*vel}px, ${Math.sin(angle)*(vel*0.5)-20}px) scale(0)`, opacity: 0 }
-                    ], { duration: 600, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' });
-                }
-
-                letters.forEach((l, idx) => setTimeout(() => l.classList.add('typed'), 160 + idx * 100));
-                setTimeout(() => sub.classList.add('typed'), 980);
-            }, 980);
-
-            setTimeout(() => overlay.classList.add('hide-intro'), 3200);
-        });
-
-        // --- 2. ФОНОВАЯ 3D-СЦЕНА САЙТА ---
-        const bgCanvas = document.getElementById('bg-canvas');
-        const bgScene = new THREE.Scene();
-        const bgCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const bgRenderer = new THREE.WebGLRenderer({ canvas: bgCanvas, alpha: true, antialias: true });
-        bgRenderer.setSize(window.innerWidth, window.innerHeight);
-
-        const coreGroup = new THREE.Group();
-        bgScene.add(coreGroup);
-        const outerMesh = new THREE.Mesh(
-            new THREE.IcosahedronGeometry(2.2, 1),
-            new THREE.MeshStandardMaterial({ color: 0x00d2ff, wireframe: true, emissive: 0x0044ff, emissiveIntensity: 0.6 })
-        );
-        coreGroup.add(outerMesh);
-
-        const innerMesh = new THREE.Mesh(
-            new THREE.OctahedronGeometry(1.4, 0),
-            new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.9, roughness: 0.1 })
-        );
-        coreGroup.add(innerMesh);
-
-        const bgLight = new THREE.PointLight(0x00d2ff, 3, 20);
-        bgLight.position.set(4, 4, 4);
-        bgScene.add(bgLight, new THREE.AmbientLight(0xffffff, 0.6));
-        bgCamera.position.z = 7;
-
-        window.addEventListener('scroll', () => {
-            const revealText = document.getElementById('reveal-text');
-            if (window.scrollY > window.innerHeight * 0.3) revealText.classList.add('visible');
-            else revealText.classList.remove('visible');
-        });
-
-        function animateSiteBg() {
-            requestAnimationFrame(animateSiteBg);
-            outerMesh.rotation.y += 0.004;
-            innerMesh.rotation.y -= 0.008;
-            bgRenderer.render(bgScene, bgCamera);
+                if (!trailerActive) return;
+                playBangSound(420 + b * 80, 0.08);
+            }, b * 420);
         }
-        animateSiteBg();
+    }
 
-        // --- 3. ДВИЖОК АВИАСИМУЛЯТОРА SKYLINE PRO ---
-        let gameActive = false;
-        let gameRenderer, gameScene, gameCamera, sunLight, hemiLight;
-        let jetGroup, gearGroup, flameLeft, flameRight, strobeLight;
-        let currentAircraft = 'raptor'; // 'boeing' | 'raptor'
-        let cameraMode = 0; // 0: Сзади, 1: Кабина пилота, 2: Камера на крыле
-        let timeMode = 0;   // 0: День, 1: Закат, 2: Ночь
+    function startSamsungTrailer(recordVideo = false) {
+        trailerActive = true;
+        document.getElementById('trailer-overlay').style.display = 'block';
+        document.getElementById('game-modal').style.display = 'block';
+        document.getElementById('hangar-menu').style.display = 'none';
+        document.querySelector('.cockpit-hud').style.display = 'none';
 
-        // Физика полета
-        let throttle = 0;
-        let airspeed = 0;
-        let maxAircraftSpeed = 1200;
-        let gearDown = true;
-        let flapsAngle = 0; // 0, 15, 30
-        let gForce = 1.0;
-        let kills = 0;
-        const keys = {};
+        if (!gameRenderer) initProSimulator();
+        initAudio();
 
-        // Объекты мира (дроны-цели, пули, ракеты, взрывы)
-        const targets = [];
-        const bullets = [];
-        const missiles = [];
-        const explosions = [];
-
-        // Звуковой движок WebAudio
-        let audioCtx, engineOsc, engineGain;
-
-        function initAudio() {
-            if (audioCtx) return;
+        // Если нажата запись для YouTube — захватываем 3D-холст в видеофайл
+        if (recordVideo) {
             try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                engineOsc = audioCtx.createOscillator();
-                engineGain = audioCtx.createGain();
-                engineOsc.type = 'sawtooth';
-                engineOsc.frequency.value = 50;
-                engineGain.gain.value = 0.03;
-                engineOsc.connect(engineGain);
-                engineGain.connect(audioCtx.destination);
-                engineOsc.start();
-            } catch(e) {}
+                const gCanvas = document.getElementById('game-canvas');
+                const stream = gCanvas.captureStream(60);
+                recordedChunks = [];
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'A-Works_Studio_YouTube_Trailer.webm';
+                    a.click();
+                };
+                mediaRecorder.start();
+                document.getElementById('rec-status').innerText = '🔴 ЗАПИСЬ ВИДЕО ДЛЯ YOUTUBE ИДЕТ...';
+            } catch (err) {
+                console.log(err);
+            }
+        } else {
+            document.getElementById('rec-status').innerText = '🎵 SAMSUNG BEAT SYNC: ACTIVE';
         }
 
-        function playBangSound(freq = 120, duration = 0.35) {
-            if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + duration);
-            g.gain.setValueAtTime(0.25, audioCtx.currentTime);
-            g.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            osc.connect(g);
-            g.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
-        }
+        let step = 0;
+        let currentCut = trailerCuts[0];
 
-        // Математическая функция высоты рельефа (Горы + Долина для ВПП)
-        function getTerrainHeight(x, z) {
-            // Плоская зона вокруг аэропорта и взлетной полосы
-            if (Math.abs(x) < 420 && z < 600 && z > -2600) return 0;
-            const distFromAirport = Math.max(0, Math.hypot(x, z + 1000) - 900);
-            const factor = Math.min(1, distFromAirport / 1200);
-            const h = (Math.sin(x * 0.0012) * Math.cos(z * 0.0012) * 320 +
-                       Math.sin(x * 0.0035 + z * 0.0025) * 140 +
-                       Math.cos(x * 0.008) * 35);
-            return Math.max(-18, h * factor);
-        }
+        function triggerCut(idx) {
+            if (!trailerActive) return;
+            currentCut = trailerCuts[idx];
 
-        function initProSimulator() {
-            const gCanvas = document.getElementById('game-canvas');
-            gameScene = new THREE.Scene();
-            gameScene.background = new THREE.Color(0x3878b8);
-            gameScene.fog = new THREE.FogExp2(0x3878b8, 0.00022);
+            // Вспышка экрана (Flash Cut)
+            const flash = document.getElementById('trailer-flash');
+            flash.style.opacity = '0.9';
+            setTimeout(() => flash.style.opacity = '0', 90);
 
-            gameCamera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.5, 14000);
-            gameRenderer = new THREE.WebGLRenderer({ canvas: gCanvas, antialias: true });
-            gameRenderer.setSize(window.innerWidth, window.innerHeight);
-            gameRenderer.shadowMap.enabled = true;
+            // Титры с ударным зумом
+            const mainTxt = document.getElementById('trailer-main-text');
+            const subTxt = document.getElementById('trailer-sub-text');
+            mainTxt.style.transform = 'scale(1.45)';
+            mainTxt.style.opacity = '0';
+            setTimeout(() => {
+                mainTxt.innerText = currentCut.title;
+                subTxt.innerText = currentCut.sub;
+                mainTxt.style.transform = 'scale(1)';
+                mainTxt.style.opacity = '1';
+            }, 60);
 
-            // Освещение
-            sunLight = new THREE.DirectionalLight(0xfff8e7, 1.6);
-            sunLight.position.set(1200, 2200, 900);
-            gameScene.add(sunLight);
+            // Звук баса
+            playSamsungBeat(idx);
 
-            hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x1e293b, 0.75);
-            gameScene.add(hemiLight);
-
-            // 1. Создаем 3D-ландшафт с вершинами (Mesh Terrain)
-            const terrainGeo = new THREE.PlaneGeometry(16000, 16000, 140, 140);
-            terrainGeo.rotateX(-Math.PI / 2);
-            const pos = terrainGeo.attributes.position;
-            const colors = [];
-
-            for (let i = 0; i < pos.count; i++) {
-                const vx = pos.getX(i);
-                const vz = pos.getZ(i);
-                const vy = getTerrainHeight(vx, vz);
-                pos.setY(i, vy);
-
-                // Раскраска по высоте: песок, трава, скалы, снег
-                if (vy < 2) colors.push(0.12, 0.28, 0.18);
-                else if (vy < 130) colors.push(0.16, 0.38, 0.22);
-                else if (vy < 260) colors.push(0.32, 0.35, 0.40);
-                else colors.push(0.92, 0.95, 0.98);
+            // Переключение самолетов и погоды под кадр
+            if (currentCut.plane) {
+                buildAircraftModel(currentCut.plane);
+                jetGroup.position.set(0, 260, -900);
+                throttle = 100;
+                airspeed = 950;
             }
-            terrainGeo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-            terrainGeo.computeVertexNormals();
-
-            const terrainMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, flatShading: true });
-            gameScene.add(new THREE.Mesh(terrainGeo, terrainMat));
-
-            // 2. Океанская вода
-            const waterGeo = new THREE.PlaneGeometry(24000, 24000);
-            waterGeo.rotateX(-Math.PI / 2);
-            const waterMat = new THREE.MeshStandardMaterial({ color: 0x043860, roughness: 0.2, metalness: 0.7, transparent: true, opacity: 0.9 });
-            const water = new THREE.Mesh(waterGeo, waterMat);
-            water.position.y = -4;
-            gameScene.add(water);
-
-            // 3. Аэропорт: ВПП, разметка, вышка УВД и ангары
-            const runway = new THREE.Mesh(
-                new THREE.PlaneGeometry(54, 2400).rotateX(-Math.PI / 2),
-                new THREE.MeshStandardMaterial({ color: 0x1e2430, roughness: 0.6 })
-            );
-            runway.position.set(0, 0.4, -1000);
-            gameScene.add(runway);
-
-            for (let z = 100; z > -2100; z -= 70) {
-                const stripe = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 34).rotateX(-Math.PI/2), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-                stripe.position.set(0, 0.5, z);
-                gameScene.add(stripe);
-
-                const edgeL = new THREE.Mesh(new THREE.SphereGeometry(0.7, 6, 6), new THREE.MeshBasicMaterial({ color: 0x00ffcc }));
-                edgeL.position.set(-25, 0.9, z);
-                const edgeR = edgeL.clone();
-                edgeR.position.set(25, 0.9, z);
-                gameScene.add(edgeL, edgeR);
+            if (typeof currentCut.time === 'number') {
+                timeMode = currentCut.time - 1;
+                cycleTimeOfDay();
             }
-
-            // Диспетчерская вышка аэропорта (ATC Tower)
-            const towerGroup = new THREE.Group();
-            const towerBase = new THREE.Mesh(new THREE.BoxGeometry(16, 65, 16), new THREE.MeshStandardMaterial({ color: 0xcbd5e1 }));
-            towerBase.position.y = 32.5;
-            const towerTop = new THREE.Mesh(new THREE.CylinderGeometry(14, 10, 12, 8), new THREE.MeshStandardMaterial({ color: 0x00d2ff, metalness: 0.8, roughness: 0.2 }));
-            towerTop.position.y = 70;
-            towerGroup.add(towerBase, towerTop);
-            towerGroup.position.set(-75, 0, -500);
-            gameScene.add(towerGroup);
-
-            // Ангары вдоль полосы
-            for (let i = 0; i < 4; i++) {
-                const hangar = new THREE.Mesh(new THREE.BoxGeometry(45, 18, 60), new THREE.MeshStandardMaterial({ color: 0x334155 }));
-                hangar.position.set(85, 9, -300 - i * 220);
-                gameScene.add(hangar);
-            }
-
-            // 4. Объемные облака
-            const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.78 });
-            for (let i = 0; i < 75; i++) {
-                const c = new THREE.Mesh(new THREE.BoxGeometry(150+Math.random()*200, 26, 120+Math.random()*150), cloudMat);
-                c.position.set((Math.random()-0.5)*11000, 380+Math.random()*600, (Math.random()-0.5)*11000);
-                gameScene.add(c);
-            }
-
-            // 5. Воздушные цели (Дроны и шары для сбивания и пролета)
-            spawnTargets();
-
-            // Сборка выбранного самолета
-            buildAircraftModel(currentAircraft);
-
-            window.addEventListener('keydown', (e) => {
-                keys[e.code] = true;
-                if (e.code === 'KeyC') toggleCameraView();
-                if (e.code === 'KeyG') toggleLandingGear();
-                if (e.code === 'KeyV') toggleFlaps();
-                if (e.code === 'KeyT') cycleTimeOfDay();
-                if (e.code === 'KeyR') respawnPlane();
-                if (e.code === 'Space') fireBullet();
-                if (e.code === 'KeyF') fireMissile();
-            });
-            window.addEventListener('keyup', (e) => keys[e.code] = false);
-        }
-
-        // --- ПОСТРОЕНИЕ 3D-МОДЕЛЕЙ BOEING 737-800 И F-22 RAPTOR ---
-        function buildAircraftModel(type) {
-            if (jetGroup) gameScene.remove(jetGroup);
-            jetGroup = new THREE.Group();
-            gearGroup = new THREE.Group();
-
-            if (type === 'boeing') {
-                maxAircraftSpeed = 850;
-                document.getElementById('hud-plane').innerText = 'BOEING 737-800';
-
-                const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.3, roughness: 0.2 });
-                const blueMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.5, roughness: 0.3 });
-                const glassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.1 });
-
-                // Длинный пассажирский фюзеляж
-                const机身 = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.15, 14, 16).rotateX(Math.PI/2), whiteMat);
-                jetGroup.add(机身);
-
-                // Синяя полоса вдоль борта
-                const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.35, 0.32, 13.8), blueMat);
-                jetGroup.add(stripe);
-
-                // Закругленный нос и остекление кабины
-                const nose = new THREE.Mesh(new THREE.SphereGeometry(1.15, 16, 16), whiteMat);
-                nose.scale.set(1, 0.9, 2.1);
-                nose.position.z = -7.0;
-                jetGroup.add(nose);
-
-                const windshield = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.55, 1.4), glassMat);
-                windshield.position.set(0, 0.55, -7.5);
-                jetGroup.add(windshield);
-
-                // Хвостовой конус и высокий киль Boeing
-                const tailCone = new THREE.Mesh(new THREE.ConeGeometry(1.15, 4.2, 16).rotateX(-Math.PI/2), whiteMat);
-                tailCone.position.z = 9.1;
-                jetGroup.add(tailCone);
-
-                const vFin = new THREE.Mesh(new THREE.BoxGeometry(0.22, 4.2, 3.2), blueMat);
-                vFin.position.set(0, 2.3, 8.2);
-                vFin.rotation.x = 0.25;
-                jetGroup.add(vFin);
-
-                // Стреловидные крылья с винглетами (законцовками)
-                const wings = new THREE.Mesh(new THREE.BoxGeometry(18.5, 0.18, 2.6), whiteMat);
-                wings.position.set(0, -0.2, -0.5);
-                jetGroup.add(wings);
-
-                const wingletL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.5, 0.9), blueMat);
-                wingletL.position.set(-9.25, 0.55, -0.5);
-                const wingletR = wingletL.clone();
-                wingletR.position.x = 9.25;
-                jetGroup.add(wingletL, wingletR);
-
-                // 2 мощных турбовентиляторных двигателя CFM56 под крыльями
-                const engGeo = new THREE.CylinderGeometry(0.65, 0.55, 2.8, 14).rotateX(Math.PI/2);
-                const engMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.7, roughness: 0.2 });
-                const engL = new THREE.Mesh(engGeo, engMat);
-                engL.position.set(-3.8, -0.85, -1.0);
-                const engR = engL.clone();
-                engR.position.x = 3.8;
-                jetGroup.add(engL, engR);
-
-                // Пламя турбин
-                flameLeft = new THREE.Mesh(new THREE.ConeGeometry(0.42, 1.8, 10).rotateX(-Math.PI/2), new THREE.MeshBasicMaterial({ color: 0x00d2ff }));
-                flameLeft.position.set(-3.8, -0.85, 0.8);
-                flameRight = flameLeft.clone();
-                flameRight.position.x = 3.8;
-                jetGroup.add(flameLeft, flameRight);
-
-                // Навигационные огни (Красный слева, Зеленый справа)
-                const navL = new THREE.Mesh(new THREE.SphereGeometry(0.22), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
-                navL.position.set(-9.3, -0.1, -0.5);
-                const navR = new THREE.Mesh(new THREE.SphereGeometry(0.22), new THREE.MeshBasicMaterial({ color: 0x00ff00 }));
-                navR.position.set(9.3, -0.1, -0.5);
-                jetGroup.add(navL, navR);
-
-            } else {
-                // F-22 RAPTOR STEALTH FIGHTER
-                maxAircraftSpeed = 1450;
-                document.getElementById('hud-plane').innerText = 'F-22 RAPTOR';
-
-                const stealthMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.75, roughness: 0.25 });
-                const accentMat = new THREE.MeshStandardMaterial({ color: 0x00d2ff, metalness: 0.6, roughness: 0.3 });
-                const canopyMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.1, transparent: true, opacity: 0.8 });
-
-                const body = new THREE.Mesh(new THREE.ConeGeometry(1.1, 12, 6).rotateX(Math.PI/2), stealthMat);
-                jetGroup.add(body);
-
-                const canopy = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.65, 3.2), canopyMat);
-                canopy.position.set(0, 0.55, -1.8);
-                jetGroup.add(canopy);
-
-                // Дельтавидные крылья
-                const wings = new THREE.Mesh(new THREE.BoxGeometry(11.5, 0.14, 3.6), stealthMat);
-                wings.position.set(0, 0, 1.0);
-                jetGroup.add(wings);
-
-                // Двойной наклонный хвост F-22
-                const tailL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 2.2, 2.0), accentMat);
-                tailL.position.set(-1.1, 1.0, 4.8);
-                tailL.rotation.z = 0.32;
-                const tailR = tailL.clone();
-                tailR.position.x = 1.1;
-                tailR.rotation.z = -0.32;
-                jetGroup.add(tailL, tailR);
-
-                // Двойное сопло форсажа
-                flameLeft = new THREE.Mesh(new THREE.ConeGeometry(0.4, 3.2, 10).rotateX(-Math.PI/2), new THREE.MeshBasicMaterial({ color: 0x00ffff }));
-                flameLeft.position.set(-0.45, 0, 6.8);
-                flameRight = flameLeft.clone();
-                flameRight.position.x = 0.45;
-                jetGroup.add(flameLeft, flameRight);
-            }
-
-            // Общие шасси
-            const wheelMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
-            const wFront = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.25, 10).rotateZ(Math.PI/2), wheelMat);
-            wFront.position.set(0, -1.35, -4.5);
-            const wLeft = wFront.clone(); wLeft.position.set(-1.8, -1.35, 0.8);
-            const wRight = wFront.clone(); wRight.position.set(1.8, -1.35, 0.8);
-            gearGroup.add(wFront, wLeft, wRight);
-            jetGroup.add(gearGroup);
-
-            gameScene.add(jetGroup);
-            respawnPlane();
-        }
-
-        // --- ЦЕЛИ И БОЕВАЯ СИСТЕМА ---
-        function spawnTargets() {
-            targets.forEach(t => gameScene.remove(t));
-            targets.length = 0;
-
-            for (let i = 0; i < 25; i++) {
-                const tGroup = new THREE.Group();
-                // Красный боевой дрон-мишень с энергетическим кольцом
-                const core = new THREE.Mesh(new THREE.OctahedronGeometry(8, 0), new THREE.MeshStandardMaterial({ color: 0xff2244, emissive: 0x880022 }));
-                const ring = new THREE.Mesh(new THREE.TorusGeometry(14, 1.2, 12, 32), new THREE.MeshBasicMaterial({ color: 0x00ffcc }));
-                tGroup.add(core, ring);
-
-                tGroup.position.set(
-                    (Math.random() - 0.5) * 6000,
-                    120 + Math.random() * 550,
-                    -600 - Math.random() * 6500
-                );
-                gameScene.add(tGroup);
-                targets.push(tGroup);
+            if (currentCut.mode === 'raptor_combat') {
+                fireMissile();
+                fireBullet();
+                createExplosion(new THREE.Vector3(jetGroup.position.x, jetGroup.position.y + 10, jetGroup.position.z - 90));
             }
         }
 
-        function fireBullet() {
-            if (!gameActive || !jetGroup) return;
-            playBangSound(260, 0.12);
-
-            const bMesh = new THREE.Mesh(new THREE.SphereGeometry(0.6, 6, 6), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
-            bMesh.position.copy(jetGroup.position);
-            bMesh.quaternion.copy(jetGroup.quaternion);
-            bMesh.translateZ(-8);
-            gameScene.add(bMesh);
-            bullets.push({ mesh: bMesh, life: 90 });
-        }
-
-        function fireMissile() {
-            if (!gameActive || !jetGroup) return;
-            playBangSound(110, 0.45);
-
-            const mMesh = new THREE.Mesh(new THREE.ConeGeometry(0.45, 3.5, 8).rotateX(-Math.PI/2), new THREE.MeshBasicMaterial({ color: 0xff4400 }));
-            mMesh.position.copy(jetGroup.position);
-            mMesh.quaternion.copy(jetGroup.quaternion);
-            mMesh.translateY(-1);
-            gameScene.add(mMesh);
-
-            // Ищем ближайшую цель для самонаведения
-            let nearest = null;
-            let minDist = Infinity;
-            targets.forEach(t => {
-                const d = t.position.distanceTo(jetGroup.position);
-                if (d < minDist) { minDist = d; nearest = t; }
-            });
-
-            missiles.push({ mesh: mMesh, target: nearest, life: 220 });
-        }
-
-        function createExplosion(pos) {
-            playBangSound(65, 0.6);
-            for (let i = 0; i < 18; i++) {
-                const p = new THREE.Mesh(new THREE.SphereGeometry(2.2, 6, 6), new THREE.MeshBasicMaterial({ color: i % 2 ? 0xffaa00 : 0xff2200 }));
-                p.position.copy(pos);
-                const vel = new THREE.Vector3((Math.random()-0.5)*8, (Math.random()-0.5)*8, (Math.random()-0.5)*8);
-                gameScene.add(p);
-                explosions.push({ mesh: p, vel: vel, life: 40 });
+        triggerCut(0);
+        trailerInterval = setInterval(() => {
+            step++;
+            if (step >= trailerCuts.length) {
+                stopSamsungTrailer();
+                return;
             }
-        }
+            triggerCut(step);
+        }, 1850);
 
-        // --- УПРАВЛЕНИЕ И СИСТЕМЫ ---
-        function selectAircraft(type) {
-            currentAircraft = type;
-            document.getElementById('hangar-menu').style.display = 'none';
-            buildAircraftModel(type);
-            initAudio();
-        }
+        // Динамическая 3D-камера с резкими пролетами (Speed Ramp)
+        let angle = 0;
+        function animateTrailerCamera() {
+            if (!trailerActive) return;
+            trailerCamAnim = requestAnimationFrame(animateTrailerCamera);
+            angle += 0.035;
 
-        function openHangar() {
-            document.getElementById('hangar-menu').style.display = 'flex';
-        }
-
-        function respawnPlane() {
-            if (!jetGroup) return;
-            jetGroup.position.set(0, 2.0, 120);
-            jetGroup.rotation.set(0, 0, 0);
-            throttle = 0;
-            airspeed = 0;
-            gearDown = true;
-            flapsAngle = 0;
-            if (gearGroup) gearGroup.visible = true;
-            document.getElementById('hud-gear').innerText = 'ВЫПУЩ';
-            document.getElementById('hud-flaps').innerText = '0°';
-        }
-
-        function toggleCameraView() {
-            cameraMode = (cameraMode + 1) % 3;
-            document.getElementById('cockpit-frame').style.display = (cameraMode === 1) ? 'block' : 'none';
-        }
-
-        function toggleLandingGear() {
-            gearDown = !gearDown;
-            if (gearGroup) gearGroup.visible = gearDown;
-            document.getElementById('hud-gear').innerText = gearDown ? 'ВЫПУЩ' : 'УБРАНЫ';
-        }
-
-        function toggleFlaps() {
-            flapsAngle = (flapsAngle === 0) ? 15 : (flapsAngle === 15 ? 30 : 0);
-            document.getElementById('hud-flaps').innerText = flapsAngle + '°';
-        }
-
-        function cycleTimeOfDay() {
-            timeMode = (timeMode + 1) % 3;
-            if (timeMode === 0) { // День
-                gameScene.background.setHex(0x3878b8);
-                gameScene.fog.color.setHex(0x3878b8);
-                sunLight.intensity = 1.6;
-            } else if (timeMode === 1) { // Закат
-                gameScene.background.setHex(0xd9534f);
-                gameScene.fog.color.setHex(0xd9534f);
-                sunLight.intensity = 1.1;
-            } else { // Ночь
-                gameScene.background.setHex(0x040814);
-                gameScene.fog.color.setHex(0x040814);
-                sunLight.intensity = 0.25;
-            }
-        }
-
-        function changeThrottle(delta) {
-            throttle = Math.max(0, Math.min(100, throttle + delta));
-        }
-
-        function startFlightGame() {
-            document.getElementById('game-modal').style.display = 'block';
-            if (!gameRenderer) initProSimulator();
-            gameActive = true;
-            animateProGame();
-        }
-
-        function stopFlightGame() {
-            gameActive = false;
-            if (engineGain) engineGain.gain.value = 0;
-            document.getElementById('game-modal').style.display = 'none';
-        }
-
-        // Отрисовка военного радара (Миникарты)
-        function drawRadar() {
-            const rCanvas = document.getElementById('radar-canvas');
-            const ctx = rCanvas.getContext('2d');
-            ctx.clearRect(0, 0, 140, 140);
-
-            // Сетка радара
-            ctx.strokeStyle = 'rgba(0, 255, 136, 0.35)';
-            ctx.beginPath();
-            ctx.arc(70, 70, 45, 0, Math.PI * 2);
-            ctx.moveTo(70, 0); ctx.lineTo(70, 140);
-            ctx.moveTo(0, 70); ctx.lineTo(140, 70);
-            ctx.stroke();
-
-            // Взлетная полоса на радаре
-            const rx = 70 + (0 - jetGroup.position.x) * 0.015;
-            const rz = 70 + (-1000 - jetGroup.position.z) * 0.015;
-            ctx.fillStyle = '#00d2ff';
-            ctx.fillRect(rx - 2, rz - 12, 4, 24);
-
-            // Красные точки воздушных целей
-            ctx.fillStyle = '#ff2244';
-            targets.forEach(t => {
-                const tx = 70 + (t.position.x - jetGroup.position.x) * 0.015;
-                const tz = 70 + (t.position.z - jetGroup.position.z) * 0.015;
-                if (Math.hypot(tx - 70, tz - 70) < 64) {
-                    ctx.beginPath();
-                    ctx.arc(tx, tz, 3.5, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            });
-
-            // Игрок в центре
-            ctx.fillStyle = '#00ff88';
-            ctx.beginPath();
-            ctx.arc(70, 70, 4, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        function animateProGame() {
-            if (!gameActive) return;
-            requestAnimationFrame(animateProGame);
-
-            // 1. Тяга и торможение
-            if (keys['ShiftLeft'] || keys['ShiftRight']) throttle = Math.min(100, throttle + 0.55);
-            if (keys['ControlLeft'] || keys['ControlRight']) throttle = Math.max(0, throttle - 0.55);
-            if (keys['KeyB'] && jetGroup.position.y <= 2.2) airspeed *= 0.96; // Колесный тормоз на полосе
-
-            const dragFactor = (gearDown ? 0.92 : 1.0) * (flapsAngle > 0 ? 0.9 : 1.0);
-            const targetSpd = (throttle / 100) * maxAircraftSpeed * dragFactor;
-            airspeed += (targetSpd - airspeed) * 0.016;
-
-            // 2. Управление (Тангаж, Крен, Рыскание)
-            const agility = (currentAircraft === 'raptor') ? 1.25 : 0.78;
-            const ctrlAuth = Math.min(1, airspeed / 135) * agility;
-            gForce = 1.0;
-
-            if (keys['KeyS'] || keys['ArrowDown']) { jetGroup.rotateX(0.022 * ctrlAuth); gForce = 1.0 + (airspeed / 220); }
-            if (keys['KeyW'] || keys['ArrowUp'])   { jetGroup.rotateX(-0.022 * ctrlAuth); gForce = 1.0 - (airspeed / 350); }
-            if (keys['KeyA'] || keys['ArrowLeft']) jetGroup.rotateZ(0.038 * ctrlAuth);
-            if (keys['KeyD'] || keys['ArrowRight'])jetGroup.rotateZ(-0.038 * ctrlAuth);
-            if (keys['KeyQ']) jetGroup.rotateY(0.016 * ctrlAuth);
-            if (keys['KeyE']) jetGroup.rotateY(-0.016 * ctrlAuth);
-
-            // Перемещение вперед
-            const step = (airspeed / 3.6) * 0.042;
-            jetGroup.translateZ(-step);
-
-            // Подъемная сила с учетом закрылков
-            const takeoffSpeed = 185 - flapsAngle * 1.5;
-            const lift = Math.min(1.05, airspeed / takeoffSpeed);
-            const groundY = Math.max(0, getTerrainHeight(jetGroup.position.x, jetGroup.position.z)) + 2.0;
-
-            if (jetGroup.position.y > groundY) {
-                jetGroup.position.y -= (1 - lift) * 0.55;
-            }
-
-            // Посадка и столкновение с рельефом
-            if (jetGroup.position.y <= groundY) {
-                jetGroup.position.y = groundY;
-                jetGroup.rotation.z *= 0.88;
-                if (jetGroup.rotation.x < 0) jetGroup.rotation.x *= 0.85;
-            }
-
-            // Сигнализация сваливания (STALL)
-            const stallAlert = document.getElementById('stall-alert');
-            if (jetGroup.position.y - groundY > 25 && airspeed < takeoffSpeed - 25) {
-                stallAlert.style.display = 'block';
-                jetGroup.rotateX(-0.014);
-            } else {
-                stallAlert.style.display = 'none';
-            }
-
-            // Форсаж и звук двигателей
-            const fScale = 0.15 + (throttle / 100) * 1.8;
-            if (flameLeft && flameRight) {
-                flameLeft.scale.set(1, fScale, 1);
-                flameRight.scale.set(1, fScale, 1);
-            }
-            if (engineOsc && engineGain) {
-                engineOsc.frequency.value = 45 + throttle * 2.8 + (airspeed * 0.14);
-                engineGain.gain.value = 0.02 + (throttle / 100) * 0.07;
-            }
-
-            // Обновление пуль
-            for (let i = bullets.length - 1; i >= 0; i--) {
-                const b = bullets[i];
-                b.mesh.translateZ(-16);
-                b.life--;
-                targets.forEach((t, tIdx) => {
-                    if (b.mesh.position.distanceTo(t.position) < 18) {
-                        createExplosion(t.position);
-                        gameScene.remove(t);
-                        targets.splice(tIdx, 1);
-                        kills++;
-                        document.getElementById('hud-kills').innerText = kills;
-                    }
-                });
-                if (b.life <= 0) { gameScene.remove(b.mesh); bullets.splice(i, 1); }
-            }
-
-            // Обновление самонаводящихся ракет
-            for (let i = missiles.length - 1; i >= 0; i--) {
-                const m = missiles[i];
-                if (m.target && targets.includes(m.target)) {
-                    m.mesh.lookAt(m.target.position);
-                    m.mesh.translateZ(9.5);
-                    if (m.mesh.position.distanceTo(m.target.position) < 20) {
-                        createExplosion(m.target.position);
-                        gameScene.remove(m.target);
-                        targets.splice(targets.indexOf(m.target), 1);
-                        kills++;
-                        document.getElementById('hud-kills').innerText = kills;
-                        m.life = 0;
-                    }
+            if (jetGroup) {
+                jetGroup.translateZ(-6.5);
+                if (currentCut.mode === 'boeing_flyby') {
+                    gameCamera.position.set(jetGroup.position.x + Math.sin(angle)*26, jetGroup.position.y + 6, jetGroup.position.z + Math.cos(angle)*26);
+                    gameCamera.lookAt(jetGroup.position);
+                } else if (currentCut.mode === 'boeing_wing') {
+                    gameCamera.position.set(jetGroup.position.x + 11, jetGroup.position.y + 1.5, jetGroup.position.z + 4);
+                    gameCamera.lookAt(jetGroup.position);
+                } else if (currentCut.mode === 'raptor_afterburner') {
+                    jetGroup.rotateZ(0.045); // Эффектная бочка в кадре!
+                    gameCamera.position.set(jetGroup.position.x - 8, jetGroup.position.y + 3, jetGroup.position.z + 18);
+                    gameCamera.lookAt(jetGroup.position);
+                } else if (currentCut.mode === 'raptor_cockpit') {
+                    gameCamera.position.set(jetGroup.position.x, jetGroup.position.y + 2.2, jetGroup.position.z - 18);
+                    gameCamera.lookAt(jetGroup.position);
                 } else {
-                    m.mesh.translateZ(-9.5);
+                    gameCamera.position.set(jetGroup.position.x + Math.cos(angle)*22, jetGroup.position.y + 8, jetGroup.position.z + 24);
+                    gameCamera.lookAt(jetGroup.position);
                 }
-                m.life--;
-                if (m.life <= 0) { gameScene.remove(m.mesh); missiles.splice(i, 1); }
             }
-
-            // Анимация взрывов
-            for (let i = explosions.length - 1; i >= 0; i--) {
-                const ex = explosions[i];
-                ex.mesh.position.add(ex.vel);
-                ex.mesh.scale.multiplyScalar(0.94);
-                ex.life--;
-                if (ex.life <= 0) { gameScene.remove(ex.mesh); explosions.splice(i, 1); }
-            }
-
-            // Работа 3 камер (Сзади / Кабина / Крыло)
-            if (cameraMode === 0) {
-                const offset = new THREE.Vector3(0, 4.8, 21).applyMatrix4(jetGroup.matrixWorld);
-                gameCamera.position.lerp(offset, 0.2);
-                gameCamera.lookAt(jetGroup.position);
-            } else if (cameraMode === 1) {
-                const camPos = new THREE.Vector3(0, 1.15, -4.5).applyMatrix4(jetGroup.matrixWorld);
-                const lookPos = new THREE.Vector3(0, 1.1, -60).applyMatrix4(jetGroup.matrixWorld);
-                gameCamera.position.copy(camPos);
-                gameCamera.lookAt(lookPos);
-            } else {
-                const wingPos = new THREE.Vector3(6.5, 0.9, 1.5).applyMatrix4(jetGroup.matrixWorld);
-                gameCamera.position.copy(wingPos);
-                gameCamera.lookAt(jetGroup.position);
-            }
-
-            // Поворот линии авиагоризонта (HUD)
-            const horizon = document.getElementById('horizon-line');
-            const degZ = (jetGroup.rotation.z * 180) / Math.PI;
-            const shiftY = (jetGroup.rotation.x * 95);
-            horizon.style.transform = `translateY(${shiftY}px) rotate(${degZ}deg)`;
-
-            // Телеметрия и радар
-            document.getElementById('hud-spd').innerText = Math.round(airspeed);
-            document.getElementById('hud-alt').innerText = Math.max(0, Math.round(jetGroup.position.y - 2.0));
-            document.getElementById('hud-thr').innerText = Math.round(throttle);
-            document.getElementById('hud-g').innerText = gForce.toFixed(1);
-            drawRadar();
-
             gameRenderer.render(gameScene, gameCamera);
         }
+        animateTrailerCamera();
+    }
 
-        function downloadStandaloneGame() {
-            const fullHtml = document.documentElement.outerHTML;
-            const blob = new Blob([fullHtml], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'SkyLine_Flight_Sim_PRO.html';
-            a.click();
-            URL.revokeObjectURL(url);
+    function stopSamsungTrailer() {
+        trailerActive = false;
+        clearInterval(trailerInterval);
+        cancelAnimationFrame(trailerCamAnim);
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
         }
-
-        window.addEventListener('resize', () => {
-            bgCamera.aspect = window.innerWidth / window.innerHeight;
-            bgCamera.updateProjectionMatrix();
-            bgRenderer.setSize(window.innerWidth, window.innerHeight);
-            if (gameRenderer) {
-                gameCamera.aspect = window.innerWidth / window.innerHeight;
-                gameCamera.updateProjectionMatrix();
-                gameRenderer.setSize(window.innerWidth, window.innerHeight);
-            }
-        });
-    </script>
-</body>
-</html>
+        if (engineGain) engineGain.gain.value = 0;
+        document.getElementById('trailer-overlay').style.display = 'none';
+        document.getElementById('game-modal').style.display = 'none';
+        document.querySelector('.cockpit-hud').style.display = 'flex';
+    }
+</script>
