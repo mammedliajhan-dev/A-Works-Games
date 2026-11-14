@@ -1,3 +1,783 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-Works Studio — PRO Flight Simulator & Trailer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #050508;
+            color: #ffffff;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* --- КИНЕМАТОГРАФИЧНОЕ ИНТРО ПРИ ВХОДЕ --- */
+        #intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #0a1124 0%, #030407 80%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            perspective: 900px;
+            overflow: hidden;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+
+        #intro-overlay.hide-intro {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .intro-floor {
+            position: absolute;
+            width: 200vw;
+            height: 120vh;
+            bottom: -45vh;
+            background-image: 
+                linear-gradient(rgba(0, 210, 255, 0.2) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 210, 255, 0.2) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: rotateX(75deg);
+            mask-image: radial-gradient(circle at center, black 10%, transparent 70%);
+            -webkit-mask-image: radial-gradient(circle at center, black 10%, transparent 70%);
+        }
+
+        .flying-logo {
+            width: 110px;
+            height: 110px;
+            border-radius: 26px;
+            background: linear-gradient(135deg, #00d2ff 0%, #0044ff 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 64px;
+            font-weight: 900;
+            color: #ffffff;
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+            z-index: 3;
+            transform: translate3d(0, -600px, 700px) rotateX(60deg) rotateZ(-35deg);
+            opacity: 0;
+            animation: logoCrash 1.2s cubic-bezier(0.6, 0.04, 0.98, 0.335) forwards;
+        }
+
+        @keyframes logoCrash {
+            0% { opacity: 0; transform: translate3d(0, -650px, 750px) rotateX(65deg) rotateY(40deg) rotateZ(-45deg) scale(2.6); }
+            20% { opacity: 1; }
+            82% {
+                transform: translate3d(0, 35px, 0) rotateX(18deg) rotateY(0deg) rotateZ(0deg) scale(1.25, 0.72);
+                box-shadow: 0 0 120px #00ffff, 0 0 200px #0066ff;
+            }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1); }
+        }
+
+        .shockwave {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 5px solid #00ffff;
+            box-shadow: 0 0 50px #00d2ff, inset 0 0 30px #00d2ff;
+            opacity: 0;
+            transform: translateY(35px) rotateX(72deg) scale(0.1);
+            z-index: 2;
+        }
+
+        .shockwave.boom { animation: waveSpread 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes waveSpread {
+            0% { opacity: 1; transform: translateY(35px) rotateX(72deg) scale(0.3); }
+            100% { opacity: 0; transform: translateY(35px) rotateX(72deg) scale(18); border-width: 1px; }
+        }
+
+        .sparks-box { position: absolute; z-index: 4; pointer-events: none; }
+        .spark {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00ffff;
+            box-shadow: 0 0 12px #00ffff;
+            opacity: 0;
+        }
+
+        .intro-title {
+            margin-top: 32px;
+            display: flex;
+            gap: 6px;
+            font-size: clamp(38px, 7vw, 74px);
+            font-weight: 900;
+            letter-spacing: 8px;
+            z-index: 3;
+        }
+
+        .intro-letter {
+            opacity: 0;
+            transform: translateY(25px) scale(0.7);<!-- МОДУЛЬ DYNAMIC EDIT ТРЕЙЛЕРА В СТИЛЕ SAMSUNG -->
+<style>
+    #trailer-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        z-index: 20000;
+        pointer-events: auto;
+        overflow: hidden;
+        background: transparent;
+    }
+    /* Резкая белая/неоновая вспышка на переходах (Flash Cut) */
+    #trailer-flash {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: #ffffff;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.18s ease-out;
+        z-index: 2;
+    }
+    /* Кинематографичные черные полосы сверху и снизу */
+    .cinema-bar {
+        position: absolute;
+        left: 0; width: 100%; height: 11vh;
+        background: #000;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+    }
+    .bar-top { top: 0; border-bottom: 1px solid rgba(0, 210, 255, 0.3); }
+    .bar-bottom { bottom: 0; border-top: 1px solid rgba(0, 210, 255, 0.3); }
+
+    /* Огромные титры в стиле презентации Samsung */
+    #trailer-caption-box {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        z-index: 4;
+        width: 90%;
+        pointer-events: none;
+    }
+    #trailer-main-text {
+        font-size: clamp(38px, 7vw, 92px);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        color: #fff;
+        text-shadow: 0 0 40px rgba(0, 210, 255, 0.9), 0 10px 30px #000;
+        transform: scale(1.3);
+        opacity: 0;
+        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s;
+    }
+    #trailer-sub-text {
+        font-size: clamp(14px, 2vw, 24px);
+        color: #00ffff;
+        letter-spacing: 8px;
+        text-transform: uppercase;
+        font-weight: 800;
+        margin-top: 12px;
+        text-shadow: 0 0 20px #000;
+    }
+    .trailer-btn-launch {
+        margin-top: 16px;
+        padding: 16px 34px;
+        border-radius: 16px;
+        background: linear-gradient(90deg, #ff0055, #ff6600);
+        color: #fff;
+        font-size: 17px;
+        font-weight: 800;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 0 35px rgba(255, 0, 85, 0.6);
+        transition: 0.3s;
+    }
+    .trailer-btn-launch:hover {
+        transform: scale(1.06);
+        box-shadow: 0 0 50px rgba(255, 0, 85, 0.9);
+    }
+</style>
+
+<div id="trailer-overlay">
+    <div id="trailer-flash"></div>
+    <div class="cinema-bar bar-top">
+        <div style="font-weight:900; letter-spacing:3px; color:#00d2ff;">A-WORKS STUDIO // OFFICIAL EDIT</div>
+        <button class="close-game-btn" onclick="stopSamsungTrailer()">✕ Закрыть трейлер</button>
+    </div>
+    <div id="trailer-caption-box">
+        <div id="trailer-main-text">A-WORKS STUDIO</div>
+        <div id="trailer-sub-text">NEXT-GEN WEB ENGINE</div>
+    </div>
+    <div class="cinema-bar bar-bottom">
+        <div id="rec-status" style="color:#00ff88; font-family:monospace; font-size:14px;">🎵 SAMSUNG BEAT SYNC: ACTIVE</div>
+        <button class="hud-btn" onclick="stopSamsungTrailer(); startFlightGame();">🚀 Сразу играть</button>
+    </div>
+</div>
+
+<script>
+    // Добавляем кнопки запуска трейлера прямо на главный экран сайта
+    window.addEventListener('DOMContentLoaded', () => {
+        const heroSection = document.querySelector('.hero');
+        if (heroSection) {
+            const btnWrap = document.createElement('div');
+            btnWrap.style.display = 'flex';
+            btnWrap.style.gap = '15px';
+            btnWrap.style.flexWrap = 'wrap';
+            btnWrap.style.justifyContent = 'center';
+            btnWrap.style.marginTop = '15px';
+
+            const tBtn = document.createElement('button');
+            tBtn.className = 'trailer-btn-launch';
+            tBtn.innerHTML = '🎬 СМОТРЕТЬ ТРЕЙЛЕР (SAMSUNG EDIT)';
+            tBtn.onclick = () => startSamsungTrailer(false);
+
+            const recBtn = document.createElement('button');
+            recBtn.className = 'trailer-btn-launch';
+            recBtn.style.background = 'linear-gradient(90deg, #7000ff, #00d2ff)';
+            recBtn.innerHTML = '🔴 АВТО-ЗАПИСЬ ТРЕЙЛЕРА ДЛЯ YOUTUBE';
+            recBtn.onclick = () => startSamsungTrailer(true);
+
+            btnWrap.appendChild(tBtn);
+            btnWrap.appendChild(recBtn);
+            heroSection.appendChild(btnWrap);
+        }
+    });
+
+    let trailerInterval = null;
+    let trailerCamAnim = null;
+    let trailerActive = false;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+
+    // Сцены трейлера под каждый удар бита (Резкие переходы: Сайт -> Boeing -> F-22 -> Бой -> Финал)
+    const trailerCuts = [
+        { title: "A-WORKS STUDIO", sub: "ПРЕДСТАВЛЯЕТ НОВУЮ ЭРУ", mode: "site", fov: 55 },
+        { title: "БЕЗ ПАУЗ. 60 FPS.", sub: "ИНТЕРАКТИВНЫЙ 3D-САЙТ", mode: "site_zoom", fov: 40 },
+        { title: "SKYLINE FLIGHT PRO", sub: "ОТКРЫТЫЙ МИР И ГОРЫ", mode: "boeing_flyby", plane: "boeing", time: 0 },
+        { title: "BOEING 737-800", sub: "ГРАЖДАНСКАЯ АВИАЦИЯ", mode: "boeing_wing", plane: "boeing", time: 1 },
+        { title: "F-22 RAPTOR", sub: "СВЕРХЗВУКОВОЙ ПЕРЕХВАТЧИК", mode: "raptor_afterburner", plane: "raptor", time: 1 },
+        { title: "ПОЛНЫЙ ФОРСАЖ", sub: "1450 КМ/Ч НАД ОКЕАНОМ", mode: "raptor_cockpit", plane: "raptor", time: 2 },
+        { title: "БОЕВАЯ СИСТЕМА", sub: "РАКЕТЫ И ПУЛЕМЕТ ВУЛКАН", mode: "raptor_combat", plane: "raptor", time: 0 },
+        { title: "ИГРАЙ ПРЯМО СЕЙЧАС", sub: "БЕСПЛАТНО НА ПК И СМАРТФОНАХ", mode: "finale", plane: "raptor", time: 1 }
+    ];
+
+    // Генератор мощного баса и синт-бита как в рекламах Samsung
+    function playSamsungBeat(cutIndex) {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+
+        // Мощный удар бочки (Kick Drop) + Sub Bass
+        const kickOsc = audioCtx.createOscillator();
+        const kickGain = audioCtx.createGain();
+        kickOsc.type = 'sine';
+        kickOsc.frequency.setValueAtTime(150, now);
+        kickOsc.frequency.exponentialRampToValueAtTime(32, now + 0.35);
+        kickGain.gain.setValueAtTime(0.6, now);
+        kickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        kickOsc.connect(kickGain);
+        kickGain.connect(audioCtx.destination);
+        kickOsc.start(now);
+        kickOsc.stop(now + 0.4);
+
+        // Резкий киберпанк-аккорд на переход (Synth Brass)
+        const notes = [110, 130.81, 146.83, 164.81, 196.00, 220, 261.63, 293.66];
+        const synthOsc = audioCtx.createOscillator();
+        const synthGain = audioCtx.createGain();
+        synthOsc.type = 'sawtooth';
+        synthOsc.frequency.setValueAtTime(notes[cutIndex % notes.length], now);
+        synthGain.gain.setValueAtTime(0.18, now);
+        synthGain.gain.exponentialRampToValueAtTime(0.008, now + 1.4);
+        synthOsc.connect(synthGain);
+        synthGain.connect(audioCtx.destination);
+        synthOsc.start(now);
+        synthOsc.stop(now + 1.45);
+
+        // Быстрый хай-хэт ритм между кадрами
+        for (let b = 1; b <= 3; b++) {
+            setTimeout(() => {
+                if (!trailerActive) return;
+                playBangSound(420 + b * 80, 0.08);
+            }, b * 420);
+        }
+    }
+
+    function startSamsungTrailer(recordVideo = false) {
+        trailerActive = true;
+        document.getElementById('trailer-overlay').style.display = 'block';
+        document.getElementById('game-modal').style.display = 'block';
+        document.getElementById('hangar-menu').style.display = 'none';
+        document.querySelector('.cockpit-hud').style.display = 'none';
+
+        if (!gameRenderer) initProSimulator();
+        initAudio();
+
+        // Если нажата запись для YouTube — захватываем 3D-холст в видеофайл
+        if (recordVideo) {
+            try {
+                const gCanvas = document.getElementById('game-canvas');
+                const stream = gCanvas.captureStream(60);
+                recordedChunks = [];
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'A-Works_Studio_YouTube_Trailer.webm';
+                    a.click();
+                };
+                mediaRecorder.start();
+                document.getElementById('rec-status').innerText = '🔴 ЗАПИСЬ ВИДЕО ДЛЯ YOUTUBE ИДЕТ...';
+            } catch (err) {
+                console.log(err);
+            }
+        } else {
+            document.getElementById('rec-status').innerText = '🎵 SAMSUNG BEAT SYNC: ACTIVE';
+        }
+
+        let step = 0;
+        let currentCut = trailerCuts[0];
+
+        function triggerCut(idx) {
+            if (!trailerActive) return;
+            currentCut = trailerCuts[idx];
+
+            // Вспышка экрана (Flash Cut)
+            const flash = document.getElementById('trailer-flash');
+            flash.style.opacity = '0.9';
+            setTimeout(() => flash.style.opacity = '0', 90);
+
+            // Титры с ударным зумом
+            const mainTxt = document.getElementById('trailer-main-text');
+            const subTxt = document.getElementById('trailer-sub-text');
+            mainTxt.style.transform = 'scale(1.45)';
+            mainTxt.style.opacity = '0';
+            setTimeout(() => {
+                mainTxt.innerText = currentCut.title;
+                subTxt.innerText = currentCut.sub;
+                mainTxt.style.transform = 'scale(1)';
+                mainTxt.style.opacity = '1';
+            }, 60);
+
+            // Звук баса
+            playSamsungBeat(idx);
+
+            // Переключение самолетов и погоды под кадр
+            if (currentCut.plane) {
+                buildAircraftModel(currentCut.plane);
+                jetGroup.position.set(0, 260, -900);
+                throttle = 100;
+                airspeed = 950;
+            }
+            if (typeof currentCut.time === 'number') {
+                timeMode = currentCut.time - 1;
+                cycleTimeOfDay();
+            }
+            if (currentCut.mode === 'raptor_combat') {
+                fireMissile();
+                fireBullet();
+                createExplosion(new THREE.Vector3(jetGroup.position.x, jetGroup.position.y + 10, jetGroup.position.z - 90));
+            }
+        }
+
+        triggerCut(0);
+        trailerInterval = setInterval(() => {
+            step++;
+            if (step >= trailerCuts.length) {
+                stopSamsungTrailer();
+                return;
+            }
+            triggerCut(step);
+        }, 1850);
+
+        // Динамическая 3D-камера с резкими пролетами (Speed Ramp)
+        let angle = 0;
+        function animateTrailerCamera() {
+            if (!trailerActive) return;
+            trailerCamAnim = requestAnimationFrame(animateTrailerCamera);
+            angle += 0.035;
+
+            if (jetGroup) {
+                jetGroup.translateZ(-6.5);
+                if (currentCut.mode === 'boeing_flyby') {
+                    gameCamera.position.set(jetGroup.position.x + Math.sin(angle)*26, jetGroup.position.y + 6, jetGroup.position.z + Math.cos(angle)*26);
+                    gameCamera.lookAt(jetGroup.position);
+                } else if (currentCut.mode === 'boeing_wing') {
+                    gameCamera.position.set(jetGroup.position.x + 11, jetGroup.position.y + 1.5, jetGroup.position.z + 4);
+                    gameCamera.lookAt(jetGroup.position);
+                } else if (currentCut.mode === 'raptor_afterburner') {
+                    jetGroup.rotateZ(0.045); // Эффектная бочка в кадре!
+                    gameCamera.position.set(jetGroup.position.x - 8, jetGroup.position.y + 3, jetGroup.position.z + 18);
+                    gameCamera.lookAt(jetGroup.position);
+                } else if (currentCut.mode === 'raptor_cockpit') {
+                    gameCamera.position.set(jetGroup.position.x, jetGroup.position.y + 2.2, jetGroup.position.z - 18);
+                    gameCamera.lookAt(jetGroup.position);
+                } else {
+                    gameCamera.position.set(jetGroup.position.x + Math.cos(angle)*22, jetGroup.position.y + 8, jetGroup.position.z + 24);
+                    gameCamera.lookAt(jetGroup.position);
+                }
+            }
+            gameRenderer.render(gameScene, gameCamera);
+        }
+        animateTrailerCamera();
+    }
+
+    function stopSamsungTrailer() {
+        trailerActive = false;
+        clearInterval(trailerInterval);
+        cancelAnimationFrame(trailerCamAnim);
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+        if (engineGain) engineGain.gain.value = 0;
+        document.getElementById('trailer-overlay').style.display = 'none';
+        document.getElementById('game-modal').style.display = 'none';
+        document.querySelector('.cockpit-hud').style.display = 'flex';
+    }
+</script>
+<!-- МОДУЛЬ DYNAMIC EDIT ТРЕЙЛЕРА В СТИЛЕ SAMSUNG -->
+<style>
+    #trailer-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        z-index: 20000;
+        pointer-events: auto;
+        overflow: hidden;
+        background: transparent;
+    }
+    /* Резкая белая/неоновая вспышка на переходах (Flash Cut) */
+    #trailer-flash {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: #ffffff;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.18s ease-out;
+        z-index: 2;
+    }
+    /* Кинематографичные черные полосы сверху и снизу */
+    .cinema-bar {
+        position: absolute;
+        left: 0; width: 100%; height: 11vh;
+        background: #000;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+    }
+    .bar-top { top: 0; border-bottom: 1px solid rgba(0, 210, 255, 0.3); }
+    .bar-bottom { bottom: 0; border-top: 1px solid rgba(0, 210, 255, 0.3); }
+
+    /* Огромные титры в стиле презентации Samsung */
+    #trailer-caption-box {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        z-index: 4;
+        width: 90%;
+        pointer-events: none;
+    }
+    #trailer-main-text {
+        font-size: clamp(38px, 7vw, 92px);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        color: #fff;
+        text-shadow: 0 0 40px rgba(0, 210, 255, 0.9), 0 10px 30px #000;
+        transform: scale(1.3);
+        opacity: 0;
+        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s;
+    }
+    #trailer-sub-text {
+        font-size: clamp(14px, 2vw, 24px);
+        color: #00ffff;
+        letter-spacing: 8px;
+        text-transform: uppercase;
+        font-weight: 800;
+        margin-top: 12px;
+        text-shadow: 0 0 20px #000;
+    }
+    .trailer-btn-launch {
+        margin-top: 16px;
+        padding: 16px 34px;
+        border-radius: 16px;
+        background: linear-gradient(90deg, #ff0055, #ff6600);
+        color: #fff;
+        font-size: 17px;
+        font-weight: 800;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 0 35px rgba(255, 0, 85, 0.6);
+        transition: 0.3s;
+    }
+    .trailer-btn-launch:hover {
+        transform: scale(1.06);
+        box-shadow: 0 0 50px rgba(255, 0, 85, 0.9);
+    }
+</style>
+
+<div id="trailer-overlay">
+    <div id="trailer-flash"></div>
+    <div class="cinema-bar bar-top">
+        <div style="font-weight:900; letter-spacing:3px; color:#00d2ff;">A-WORKS STUDIO // OFFICIAL EDIT</div>
+        <button class="close-game-btn" onclick="stopSamsungTrailer()">✕ Закрыть трейлер</button>
+    </div>
+    <div id="trailer-caption-box">
+        <div id="trailer-main-text">A-WORKS STUDIO</div>
+        <div id="trailer-sub-text">NEXT-GEN WEB ENGINE</div>
+    </div>
+    <div class="cinema-bar bar-bottom">
+        <div id="rec-status" style="color:#00ff88; font-family:monospace; font-size:14px;">🎵 SAMSUNG BEAT SYNC: ACTIVE</div>
+        <button class="hud-btn" onclick="stopSamsungTrailer(); startFlightGame();">🚀 Сразу играть</button>
+    </div>
+</div>
+
+<script>
+    // Добавляем кнопки запуска трейлера прямо на главный экран сайта
+    window.addEventListener('DOMContentLoaded', () => {
+        const heroSection = document.querySelector('.hero');
+        if (heroSection) {
+            const btnWrap = document.createElement('div');
+            btnWrap.style.display = 'flex';
+            btnWrap.style.gap = '15px';
+            btnWrap.style.flexWrap = 'wrap';
+            btnWrap.style.justifyContent = 'center';
+            btnWrap.style.marginTop = '15px';
+
+            const tBtn = document.createElement('button');
+            tBtn.className = 'trailer-btn-launch';
+            tBtn.innerHTML = '🎬 СМОТРЕТЬ ТРЕЙЛЕР (SAMSUNG EDIT)';
+            tBtn.onclick = () => startSamsungTrailer(false);
+
+            const recBtn = document.createElement('button');
+            recBtn.className = 'trailer-btn-launch';
+            recBtn.style.background = 'linear-gradient(90deg, #7000ff, #00d2ff)';
+            recBtn.innerHTML = '🔴 АВТО-ЗАПИСЬ ТРЕЙЛЕРА ДЛЯ YOUTUBE';
+            recBtn.onclick = () => startSamsungTrailer(true);
+
+            btnWrap.appendChild(tBtn);
+            btnWrap.appendChild(recBtn);
+            heroSection.appendChild(btnWrap);
+        }
+    });
+
+    let trailerInterval = null;
+    let trailerCamAnim = null;
+    let trailerActive = false;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+
+    // Сцены трейлера под каждый удар бита (Резкие переходы: Сайт -> Boeing -> F-22 -> Бой -> Финал)
+    const trailerCuts = [
+        { title: "A-WORKS STUDIO", sub: "ПРЕДСТАВЛЯЕТ НОВУЮ ЭРУ", mode: "site", fov: 55 },
+        { title: "БЕЗ ПАУЗ. 60 FPS.", sub: "ИНТЕРАКТИВНЫЙ 3D-САЙТ", mode: "site_zoom", fov: 40 },
+        { title: "SKYLINE FLIGHT PRO", sub: "ОТКРЫТЫЙ МИР И ГОРЫ", mode: "boeing_flyby", plane: "boeing", time: 0 },
+        { title: "BOEING 737-800", sub: "ГРАЖДАНСКАЯ АВИАЦИЯ", mode: "boeing_wing", plane: "boeing", time: 1 },
+        { title: "F-22 RAPTOR", sub: "СВЕРХЗВУКОВОЙ ПЕРЕХВАТЧИК", mode: "raptor_afterburner", plane: "raptor", time: 1 },
+        { title: "ПОЛНЫЙ ФОРСАЖ", sub: "1450 КМ/Ч НАД ОКЕАНОМ", mode: "raptor_cockpit", plane: "raptor", time: 2 },
+        { title: "БОЕВАЯ СИСТЕМА", sub: "РАКЕТЫ И ПУЛЕМЕТ ВУЛКАН", mode: "raptor_combat", plane: "raptor", time: 0 },
+        { title: "ИГРАЙ ПРЯМО СЕЙЧАС", sub: "БЕСПЛАТНО НА ПК И СМАРТФОНАХ", mode: "finale", plane: "raptor", time: 1 }
+    ];
+
+    // Генератор мощного баса и синт-бита как в рекламах Samsung
+    function playSamsungBeat(cutIndex) {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+
+        // Мощный удар бочки (Kick Drop) + Sub Bass
+        const kickOsc = audioCtx.createOscillator();
+        const kickGain = audioCtx.createGain();
+        kickOsc.type = 'sine';
+        kickOsc.frequency.setValueAtTime(150, now);
+        kickOsc.frequency.exponentialRampToValueAtTime(32, now + 0.35);
+        kickGain.gain.setValueAtTime(0.6, now);
+        kickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        kickOsc.connect(kickGain);
+        kickGain.connect(audioCtx.destination);
+        kickOsc.start(now);
+        kickOsc.stop(now + 0.4);
+
+        // Резкий киберпанк-аккорд на переход (Synth Brass)
+        const notes = [110, 130.81, 146.83, 164.81, 196.00, 220, 261.63, 293.66];
+        const synthOsc = audioCtx.createOscillator();
+        const synthGain = audioCtx.createGain();
+        synthOsc.type = 'sawtooth';
+        synthOsc.frequency.setValueAtTime(notes[cutIndex % notes.length], now);
+        synthGain.gain.setValueAtTime(0.18, now);
+        synthGain.gain.exponentialRampToValueAtTime(0.008, now + 1.4);
+        synthOsc.connect(synthGain);
+        synthGain.connect(audioCtx.destination);
+        synthOsc.start(now);
+        synthOsc.stop(now + 1.45);
+
+        // Быстрый хай-хэт ритм между кадрами
+        for (let b = 1; b <= 3; b++) {
+            setTimeout(() => {
+                if (!trailerActive) return;
+                playBangSound(420 + b * 80, 0.08);
+            }, b * 420);
+        }
+    }
+
+    function startSamsungTrailer(recordVideo = false) {
+        trailerActive = true;
+        document.getElementById('trailer-overlay').style.display = 'block';
+        document.getElementById('game-modal').style.display = 'block';
+        document.getElementById('hangar-menu').style.display = 'none';
+        document.querySelector('.cockpit-hud').style.display = 'none';
+
+        if (!gameRenderer) initProSimulator();
+        initAudio();
+
+        // Если нажата запись для YouTube — захватываем 3D-холст в видеофайл
+        if (recordVideo) {
+            try {
+                const gCanvas = document.getElementById('game-canvas');
+                const stream = gCanvas.captureStream(60);
+                recordedChunks = [];
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'A-Works_Studio_YouTube_Trailer.webm';
+                    a.click();
+                };
+                mediaRecorder.start();
+                document.getElementById('rec-status').innerText = '🔴 ЗАПИСЬ ВИДЕО ДЛЯ YOUTUBE ИДЕТ...';
+            } catch (err) {
+                console.log(err);
+            }
+        } else {
+            document.getElementById('rec-status').innerText = '🎵 SAMSUNG BEAT SYNC: ACTIVE';
+        }
+
+        let step = 0;
+        let currentCut = trailerCuts[0];
+
+        function triggerCut(idx) {
+            if (!trailerActive) return;
+            currentCut = trailerCuts[idx];
+
+            // Вспышка экрана (Flash Cut)
+            const flash = document.getElementById('trailer-flash');
+            flash.style.opacity = '0.9';
+            setTimeout(() => flash.style.opacity = '0', 90);
+
+            // Титры с ударным зумом
+            const mainTxt = document.getElementById('trailer-main-text');
+            const subTxt = document.getElementById('trailer-sub-text');
+            mainTxt.style.transform = 'scale(1.45)';
+            mainTxt.style.opacity = '0';
+            setTimeout(() => {
+                mainTxt.innerText = currentCut.title;
+                subTxt.innerText = currentCut.sub;
+                mainTxt.style.transform = 'scale(1)';
+                mainTxt.style.opacity = '1';
+            }, 60);
+
+            // Звук баса
+            playSamsungBeat(idx);
+
+            // Переключение самолетов и погоды под кадр
+            if (currentCut.plane) {
+                buildAircraftModel(currentCut.plane);
+                jetGroup.position.set(0, 260, -900);
+                throttle = 100;
+                airspeed = 950;
+            }
+            if (typeof currentCut.time === 'number') {
+                timeMode = currentCut.time - 1;
+                cycleTimeOfDay();
+            }
+            if (currentCut.mode === 'raptor_combat') {
+                fireMissile();
+                fireBullet();
+                createExplosion(new THREE.Vector3(jetGroup.position.x, jetGroup.position.y + 10, jetGroup.position.z - 90));
+            }
+        }
+
+        triggerCut(0);
+        trailerInterval = setInterval(() => {
+            step++;
+            if (step >= trailerCuts.length) {
+                stopSamsungTrailer();
+                return;
+            }
+            triggerCut(step);
+        }, 1850);
+
+        // Динамическая 3D-камера с резкими пролетами (Speed Ramp)
+        let angle = 0;
+        function animateTrailerCamera() {
+            if (!trailerActive) return;
+            trailerCamAnim = requestAnimationFrame(animateTrailerCamera);
+            angle += 0.035;
+
+            if (jetGroup) {
+                jetGroup.translateZ(-6.5);
+                if (currentCut.mode === 'boeing_flyby') {
+                    gameCamera.position.set(jetGroup.position.x + Math.sin(angle)*26, jetGroup.position.y + 6, jetGroup.position.z + Math.cos(angle)*26);
+                    gameCamera.lookAt(jetGroup.position);
+                } else if (currentCut.mode === 'boeing_wing') {
+                    gameCamera.position.set(jetGroup.position.x + 11, jetGroup.position.y + 1.5, jetGroup.position.z + 4);
+                    gameCamera.lookAt(jetGroup.position);
+                } else if (currentCut.mode === 'raptor_afterburner') {
+                    jetGroup.rotateZ(0.045); // Эффектная бочка в кадре!
+                    gameCamera.position.set(jetGroup.position.x - 8, jetGroup.position.y + 3, jetGroup.position.z + 18);
+                    gameCamera.lookAt(jetGroup.position);
+                } else if (currentCut.mode === 'raptor_cockpit') {
+                    gameCamera.position.set(jetGroup.position.x, jetGroup.position.y + 2.2, jetGroup.position.z - 18);
+                    gameCamera.lookAt(jetGroup.position);
+                } else {
+                    gameCamera.position.set(jetGroup.position.x + Math.cos(angle)*22, jetGroup.position.y + 8, jetGroup.position.z + 24);
+                    gameCamera.lookAt(jetGroup.position);
+                }
+            }
+            gameRenderer.render(gameScene, gameCamera);
+        }
+        animateTrailerCamera();
+    }
+
+    function stopSamsungTrailer() {
+        trailerActive = false;
+        clearInterval(trailerInterval);
+        cancelAnimationFrame(trailerCamAnim);
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+        if (engineGain) engineGain.gain.value = 0;
+        document.getElementById('trailer-overlay').style.display = 'none';
+        document.getElementById('game-modal').style.display = 'none';
+        document.querySelector('.cockpit-hud').style.display = 'flex';
+    }
+</script>
 <!-- МОДУЛЬ DYNAMIC EDIT ТРЕЙЛЕРА В СТИЛЕ SAMSUNG -->
 <style>
     #trailer-overlay {
